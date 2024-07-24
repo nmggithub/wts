@@ -3,11 +3,11 @@
 <atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
   <atom:title>WTS</atom:title>
   <atom:updated>2024-07-23T19:11:10-04:00</atom:updated>
-  <atom:id>https://nmggithub.github.io/wts</atom:id>
-  <atom:icon>https://nmggithub.github.io/wts/favicon.png</atom:icon>
-  <atom:logo>https://nmggithub.github.io/wts/logo.png</atom:logo>
-  <atom:link href="https://nmggithub.github.io/wts/feed.xml" rel="self" />
-  <atom:link href="https://nmggithub.github.io/wts" />
+  <atom:id>https://wts.dev</atom:id>
+  <atom:icon>https://wts.dev/favicon.png</atom:icon>
+  <atom:logo>https://wts.dev/logo.png</atom:logo>
+  <atom:link href="https://wts.dev/feed.xml" rel="self" />
+  <atom:link href="https://wts.dev" />
   <atom:author>
     <atom:name>Noah Gregory</atom:name>
     <atom:email>noahmgregory@gmail.com</atom:email>
