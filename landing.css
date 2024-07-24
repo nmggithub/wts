@@ -1,8 +1,8 @@
 :root {
   --letter-expand-duration: 0.5s;
-  --letter-color: var(--font-color);
+  --letter-color: var(--accent-color);
   --feed-link-height: 6vw;
-  --feed-link-color: oklch(from var(--letter-color) calc(l + 0.05) c h);
+  --feed-link-color: var(--letter-color);
 }
 main {
   height: 100%;
@@ -12,6 +12,7 @@ main {
   div#container {
     text-align: center;
     a#feed {
+      font-style: italic;
       text-decoration: none;
       color: var(--feed-link-color);
       font-family: 'Rubik', sans-serif;
@@ -23,6 +24,7 @@ main {
       transition-duration: 0.5s;
       transition-delay: var(--letter-expand-duration);
       overflow: hidden;
+      width: 100%;
     }
     div#letters {
       --transition-duration: 0.5s;
