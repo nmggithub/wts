@@ -31,7 +31,6 @@ main {
     }
 
     div#numbers {
-      --transition-duration: 0.5s;
       color: var(--number-color);
       user-select: none;
       display: inline-block;
@@ -64,7 +63,7 @@ main {
         overflow: hidden;
         margin: 0;
         font-family: 'Rubik Mono One', monospace;
-        transition: width var(--transition-duration), margin var(--transition-duration);
+        transition: width var(--number-expand-duration), margin var(--number-expand-duration);
         &.number {
           width: 1ch;
         }

@@ -27,7 +27,6 @@ main {
       width: 100%;
     }
     div#letters {
-      --transition-duration: 0.5s;
       color: var(--letter-color);
       user-select: none;
       display: inline-block;
@@ -41,14 +40,14 @@ main {
       span#s {
         margin: 0;
         font-family: 'Rubik Mono One', monospace;
-        transition: width var(--transition-duration), margin var(--transition-duration);
+        transition: width var(--letter-expand-duration), margin var(--letter-expand-duration);
         width: 1ch;
         font-size: 12vw;
         display: inline-block;
         vertical-align: bottom;
         &::after {
           width: 0;
-          transition: width var(--transition-duration);
+          transition: width var(--letter-expand-duration);
           display: inline-block;
           content: '???';
           overflow: hidden;
