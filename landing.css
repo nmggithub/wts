@@ -4,13 +4,16 @@
   --feed-link-height: 6vw;
   --feed-link-color: var(--letter-color);
 }
+
 main {
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+
   div#container {
     text-align: center;
+
     a#feed {
       font-style: italic;
       text-decoration: none;
@@ -26,6 +29,7 @@ main {
       overflow: hidden;
       width: 100%;
     }
+
     div#letters {
       color: var(--letter-color);
       user-select: none;
@@ -35,6 +39,7 @@ main {
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
+
       span#w,
       span#t,
       span#s {
@@ -45,6 +50,7 @@ main {
         font-size: 12vw;
         display: inline-block;
         vertical-align: bottom;
+
         &::after {
           width: 0;
           transition: width var(--letter-expand-duration);
@@ -55,18 +61,22 @@ main {
         }
       }
     }
+
     &:hover {
       div#letters {
+
         span#w,
         span#t,
         span#s {
           margin: 0 0.15ch;
           width: 4ch;
+
           &::after {
             width: 3ch;
           }
         }
       }
+
       a#feed {
         height: var(--feed-link-height);
       }

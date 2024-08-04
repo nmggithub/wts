@@ -43,18 +43,23 @@ main {
       span#_4a {
         order: 0;
       }
+
       span#page {
         order: 1;
       }
+
       span#_0 {
         order: 2;
       }
+
       span#not {
         order: 3;
       }
+
       span#_4b {
         order: 4;
       }
+
       span#found {
         order: 5;
       }
@@ -64,12 +69,15 @@ main {
         margin: 0;
         font-family: 'Rubik Mono One', monospace;
         transition: width var(--number-expand-duration), margin var(--number-expand-duration);
+
         &.number {
           width: 1ch;
         }
+
         &.word {
           width: 0ch;
         }
+
         font-size: 12vw;
         display: inline-block;
       }
@@ -80,19 +88,24 @@ main {
         span.number {
           width: 0;
         }
+
         span.word {
           margin: 0 0.15ch;
+
           &#page {
             width: 4ch;
           }
+
           &#not {
             width: 3ch;
           }
+
           &#found {
             width: 5ch;
           }
         }
       }
+
       a#home {
         height: var(--home-link-height);
       }

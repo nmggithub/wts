@@ -2,9 +2,11 @@
   --background-color: oklch(85% 0.075 70);
   --accent-color: oklch(20% 0.25 305);
 }
+
 html {
   height: 100%;
   background-color: var(--background-color);
+
   body {
     margin: 0;
     height: 100%;
