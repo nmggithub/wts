@@ -1,6 +1,6 @@
 :root {
   --background-color: oklch(85% 0.075 70);
-  --accent-color: oklch(20% 0.25 305);
+  --accent-color: oklch(25% 0.2 305);
 }
 
 html {
