@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE feed>
 <atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
-  <atom:title>WTS</atom:title>
-  <atom:updated>2024-07-23T21:59:25-04:00</atom:updated>
+  <atom:title>Watch This Space</atom:title>
+  <atom:subtitle>A security research blog.</atom:subtitle>
+  <atom:updated>2024-08-05T06:49:44-04:00</atom:updated>
   <atom:id>https://wts.dev</atom:id>
   <atom:icon>https://wts.dev/favicon.png</atom:icon>
   <atom:logo>https://wts.dev/logo.png</atom:logo>

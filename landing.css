@@ -1,8 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap');
+
 :root {
   --letter-expand-duration: 0.5s;
+  --subscribe-link-slide-duration: 0.5s;
   --letter-color: var(--accent-color);
-  --feed-link-height: 6vw;
   --feed-link-color: var(--letter-color);
+}
+
+nav a {
+  position: fixed;
+  font-weight: 500;
+  font-size: 5vw;
+  padding: 2vw;
+
+  &#about {
+    bottom: 0;
+    left: 0;
+  }
+
+  &#posts {
+    bottom: 0;
+    right: 0;
+  }
 }
 
 main {
@@ -16,21 +35,22 @@ main {
 
     a#feed {
       font-style: italic;
-      text-decoration: none;
-      color: var(--feed-link-color);
-      font-family: 'Rubik', sans-serif;
+      width: 100%;
       font-weight: 500;
-      font-size: var(--feed-link-height);
+      font-size: 5vw;
       display: inline-block;
       height: 0;
       transition-property: height;
-      transition-duration: 0.5s;
+      transition-duration: var(--subscribe-link-slide-duration);
       transition-delay: var(--letter-expand-duration);
       overflow: hidden;
-      width: 100%;
     }
 
     div#letters {
+      abbr {
+        text-decoration: none;
+      }
+
       color: var(--letter-color);
       user-select: none;
       display: inline-block;
@@ -45,20 +65,14 @@ main {
       span#s {
         margin: 0;
         font-family: 'Rubik Mono One', monospace;
+        font-size: 10vw;
         transition: width var(--letter-expand-duration), margin var(--letter-expand-duration);
         width: 1ch;
-        font-size: 12vw;
+
         display: inline-block;
         vertical-align: bottom;
-
-        &::after {
-          width: 0;
-          transition: width var(--letter-expand-duration);
-          display: inline-block;
-          content: '???';
-          overflow: hidden;
-          vertical-align: bottom;
-        }
+        overflow: hidden;
+        height: 1lh;
       }
     }
 
@@ -69,16 +83,23 @@ main {
         span#t,
         span#s {
           margin: 0 0.15ch;
-          width: 4ch;
+        }
 
-          &::after {
-            width: 3ch;
-          }
+        span#w {
+          width: 5ch;
+        }
+
+        span#t {
+          width: 4ch;
+        }
+
+        span#s {
+          width: 5ch;
         }
       }
 
       a#feed {
-        height: var(--feed-link-height);
+        height: 1lh;
       }
     }
   }

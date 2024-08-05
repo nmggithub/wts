@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+
+<head>
+  <!-- -- Common -- -->
+  <base target="_blank" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="
+      default-src 'none';
+      style-src https://fonts.googleapis.com/ 'self';
+      font-src https://fonts.gstatic.com/;
+      img-src 'self';
+      form-action 'none'
+      " />
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/style.css" />
+  <!-- Twitter/X uses the standard "name" attribute -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@wtsdev" />
+  <meta name="twitter:creator" content="@wtsdev" />
+  <!-- Facebook/OpenGraph uses the non-standard "property" attribute -->
+  <meta property="og:site_name" content="Watch This Space" />
+  <meta property="og:image" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:secure_url" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="A large purple letter W on a light tan background" />
+  <!-- -- Page-Specific -- -->
+  <!-- Styles -->
+  <!-- URL -->
+  <link rel="canonical" href="https://wts.dev/about" />
+  <meta property="og:url" content="https://wts.dev/about" />
+  <!-- Title -->
+  <meta property="og:title" content="Watch This Space - About" />
+  <title>Watch This Space - About</title>
+  <!-- Description -->
+  <meta name="description" content="A security research blog." />
+  <meta property="og:description" content="A security research blog." />
+  <!-- Additional -->
+  <meta property="og:type" content="website" />
+  <meta name="author" href="Noah Gregory" />
+</head>
+
+<body>
+  <main class="page">
+    <h1>About</h1>
+    <h2>About Me</h2>
+    <p>
+      Hello! Welcome to my blog: "Watch This Space". My name is Noah Gregory. I am a software engineer by profession and a security researcher by hobby. Software engineering pays the bills, but I've always been passionate about cybersecurity and security research. I love diving deep and learning everything I can about a piece of software; how it ticks and where the potential weak points are. I spend my free time reverse-engineering software, looking for vulnerabilities, and reporting those I find to the software vendors.
+    </p>
+    <h2>About This Blog</h2>
+    <h3>The Current State</h3>
+    <p>
+      At the time of writing, this blog is empty, but I hope to start posting soon. Please remember that I do this in my free time, so I may not post often. I plan to hopefully post about vulnerabilities I find <em>(obviously only after they have been patched by the vendor)</em>, so if that's something that interests you <a type="application/atom+xml" href="/feed.xml" target="_self" title="Feed for Watch This Space">watch this space.</a>
+    </p>
+    <h3>Why The Name "Watch This Space"?</h3>
+    <p>
+      I chose the name "Watch This Space" because I want people to feel the same excitement I feel when I read vulnerability disclosures or watch security talks on YouTube. I find it so fascinating to learn all about the internals of software, how white-hat hackers are able to break this software, and what (if anything) the vendors do to mitigate or resolve the vulnerabilities. The name "Watch This Space" is a call to readers to keep an eye on this blog, but it's also a general call to be aware of the larger work of security research as a whole. I'm certainly not the only security researcher out here. Where possible, I will try to highlight the work of other security researchers that I find interesting and/or impactful.
+    </p>
+    <p>
+      Some may say security research and bug hunting should prioritize seriousness over spectacle. <em>I would agree.</em> While the term "watch this space" may seem to lend more towards the former, I believe it works as a hook to get people interested. Once you have their attention, you can emphasize the seriousness of the matter. Also, I personally believe that security research shouldn't be <em>entirely</em> devoid of spectacle, and sometimes it's impossible to control the level of spectacle it becomes once you put your research out into the public. Regardless, in this blog, I hope to strike a good balance of spectacle and seriousness.
+    </p>
+    <h3>Technical Notes About This Blog</h3>
+    <p>
+      The code for this blog is written entirely by me. Handwritten HTML and CSS, no JavaScript, no images (yet), and the only external resources are two fonts and their associated CSS. Even <a type="application/atom+xml" href="/feed.xml" target="_self">the Atom feed for this blog</a> is handwritten by me. <strong>This is intentional.</strong> It keeps things simpler, and it also loads very quickly. While I don't want to disparage modern web development with all its JavaScript and compiling and transpiling and bundling and server rendering and such, sometimes all you need is a simple <a href="https://motherfuckingwebsite.com/">motherf***ing website</a> <em>(note: don't click the previous link if you are, in any way, averse to profanity).</em>
+    </p>
+    <p>
+      Also, yes, you can subscribe to this blog. Just take this <a type="application/atom+xml" href="/feed.xml" target="_self">Atom feed</a> and drop it into the RSS reader of your choice. Yes, your RSS reader probably supports Atom feeds, even if it doesn't advertise it. An Atom feed is nice because it doesn't track you. You might think I could just look at the server logs for requests to the feed URL, but I can't. <a href="https://github.com/nmggithub/wts">I host this blog on GitHub Pages through this repository.</a> GitHub might be keeping logs somewhere but they don't share them with me. So, go ahead and subscribe! I'll never know you did :)
+    </p>
+    <p>
+      I also pride myself in making this blog as accessible as possible. I try my best to use HTML as it's intended: with proper use of all semantic elements (sectioning, emphasis, etc.) and all other accessibility features. I also aim to make this blog fully compliant with <a href="https://www.w3.org/TR/WCAG22/">the <abbr title="Web Content Accessibility Guidelines">WCAG</abbr> 2.2 Standard.</a> If you are using assistive technology and are having trouble using this blog, or have any suggestions on how I can make it more accessible, please don't hesitate to <a href="mailto:noahmgregory@gmail.com">email me.</a> I welcome and value your feedback and suggestions.
+    </p>
+    <p>
+      As a final note, this blog does make use of some newer CSS features; such as <a href="https://drafts.csswg.org/css-nesting-1/">CSS nesting</a> and <a href="https://drafts.csswg.org/css-color-5/#relative-Oklch">Oklab color functions.</a> If the blog looks visually strange to you, you may have an older browser that cannot use these newer features. Please upgrade your browser version to (hopefully) view this blog as intended. You should also be keeping your browser up to date in general, as these updates also often include important security patches that keep you and your computer secure.
+    </p>
+  </main>
+</body>
+
+</html>
