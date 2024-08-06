@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
 :root {
-  --background-color: oklch(85% 0.075 70);
+  --background-color: oklch(93% 0.075 70);
   --accent-color: oklch(25% 0.2 305);
   font-size: 18px;
 
@@ -24,16 +24,23 @@ html {
     font-family: 'Rubik', sans-serif;
 
     a {
-      --link-color: oklch(from var(--accent-color) calc(l + 0.1) c 260);
+      --link-color: oklch(from var(--accent-color) 0.5 c 260);
 
       color: var(--link-color);
 
-      &:active {
-        color: oklch(from var(--link-color) calc(l + 0.15) c h);
-      }
-
       &:visited {
         color: oklch(from var(--link-color) l c calc(h + 50))
+      }
+
+      text-decoration-thickness: 0.1rem;
+
+      &:hover,
+      &:focus {
+        text-decoration-thickness: 0.15rem;
+
+        &:active {
+          text-decoration-thickness: 0.2rem;
+        }
       }
     }
 
