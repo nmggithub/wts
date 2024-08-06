@@ -1,127 +1,78 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap');
 
-:root {
-  --number-expand-duration: 0.5s;
-  --home-link-slide-duration: 0.5s;
-  --number-color: var(--accent-color);
-}
+div.expansion#_404-expansion {
 
-body#_404 {
-  main {
-    a {
-      text-underline-offset: 1vw;
+  &>div.components {
+    color: var(--accent-color);
 
-      text-decoration-thickness: 0.75vw;
 
-      &:hover,
-      &:focus {
-        text-decoration-thickness: 1vw;
+    &>span {
+      margin: 0;
+      font-family: 'Rubik Mono One', monospace;
+      transition-property: width, margin;
+      font-size: clamp(1rem, 10vw, 20vh);
 
-        &:active {
-          text-decoration-thickness: 1.25vw;
-        }
+      &.number {
+        width: 1ch;
       }
+
+      &.word {
+        width: 0ch;
+      }
+
+      &#_4a {
+        order: 0;
+      }
+
+      &#page {
+        order: 1;
+      }
+
+      &#_0 {
+        order: 2;
+      }
+
+      &#not {
+        order: 3;
+      }
+
+      &#_4b {
+        order: 4;
+      }
+
+      &#found {
+        order: 5;
+      }
+
     }
+  }
 
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  &>a.link#home {
+    font-family: 'Rubik', sans-serif;
+    font-style: italic;
+    font-size: clamp(1rem, 5vw, 20vh);
+  }
 
-    div#container {
-      text-align: center;
-
-      a#home {
-        font-family: 'Rubik', sans-serif;
-        font-style: italic;
-        font-size: clamp(1rem, 5vw, 20vh);
-        display: inline-block;
-        height: 0;
-        transition-property: height;
-        transition-duration: var(--home-link-slide-duration);
-        transition-delay: var(--number-expand-duration);
-        overflow: hidden;
+  &:hover,
+  &:has(a.link#home:focus) {
+    div.components {
+      span.number {
+        width: 0;
       }
 
-      div#numbers {
-        color: var(--number-color);
-        user-select: none;
-        display: inline-block;
-        text-decoration: none;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
+      span.word {
+        margin: 0 0.15ch;
 
-        span#_4a {
-          order: 0;
+        &#page {
+          width: 4ch;
         }
 
-        span#page {
-          order: 1;
+        &#not {
+          width: 3ch;
         }
 
-        span#_0 {
-          order: 2;
-        }
-
-        span#not {
-          order: 3;
-        }
-
-        span#_4b {
-          order: 4;
-        }
-
-        span#found {
-          order: 5;
-        }
-
-        span {
-          overflow: hidden;
-          margin: 0;
-          font-family: 'Rubik Mono One', monospace;
-          transition: width var(--number-expand-duration), margin var(--number-expand-duration);
-          font-size: clamp(1rem, 10vw, 20vh);
-          display: inline-block;
-
-          &.number {
-            width: 1ch;
-          }
-
-          &.word {
-            width: 0ch;
-          }
-
-        }
-      }
-
-      &:hover,
-      &:has(a:focus) {
-        div#numbers {
-          span.number {
-            width: 0;
-          }
-
-          span.word {
-            margin: 0 0.15ch;
-
-            &#page {
-              width: 4ch;
-            }
-
-            &#not {
-              width: 3ch;
-            }
-
-            &#found {
-              width: 5ch;
-            }
-          }
-        }
-
-        a#home {
-          height: 1.5lh;
+        &#found {
+          width: 5ch;
         }
       }
     }

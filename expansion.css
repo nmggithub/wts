@@ -1,0 +1,46 @@
+main:has(.expansion) {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  div.expansion {
+    --expand-duration: 0.5s;
+    --link-slide-duration: 0.5s;
+    text-align: center;
+
+    &>div.components {
+      user-select: none;
+      text-decoration: none;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+
+      span {
+        color: var(--letter-color);
+        transition-property: width;
+        transition-duration: var(--expand-duration);
+        display: inline-block;
+        overflow: hidden;
+        height: 1lh;
+      }
+    }
+
+    &>a.link {
+      display: inline-block;
+      height: 0;
+      transition-property: height;
+      transition-duration: var(--link-slide-duration);
+      transition-delay: var(--expand-duration);
+      overflow: hidden;
+    }
+
+    &:hover,
+    &:has(a.link:focus) {
+      a.link {
+        height: 1.5lh;
+      }
+    }
+  }
+}

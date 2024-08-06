@@ -8,24 +8,10 @@
 }
 
 body#landing {
-  a {
-    text-underline-offset: 1vw;
-
-    text-decoration-thickness: 0.75vw;
-
-    &:hover,
-    &:focus {
-      text-decoration-thickness: 1vw;
-
-      &:active {
-        text-decoration-thickness: 1.25vw;
-      }
-    }
-  }
 
   nav a {
     position: fixed;
-    font-size: clamp(1rem, 5vw, 20vh);
+    font-size: clamp(1rem, 5vw, 30vh);
 
     &#about {
       bottom: 2vw;
@@ -38,77 +24,43 @@ body#landing {
     }
   }
 
-  main {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  div.expansion#landing-expansion {
 
-    div#container {
-      text-align: center;
+    &>div.components {
+      color: var(--accent-color);
 
-      a#feed {
-        font-style: italic;
-        width: 100%;
-        font-size: clamp(1rem, 5vw, 20vh);
-        display: inline-block;
-        height: 0;
-        transition-property: height;
-        transition-duration: var(--subscribe-link-slide-duration);
-        transition-delay: var(--letter-expand-duration);
-        overflow: hidden;
+      &>span {
+        margin: 0;
+        font-family: 'Rubik Mono One', monospace;
+        transition-property: width, margin;
+        font-size: clamp(1rem, 10vw, 20vh);
+        width: 1ch;
       }
+    }
 
-      div#letters {
+    &>a.link#feed {
+      font-family: 'Rubik', sans-serif;
+      font-style: italic;
+      font-size: clamp(1rem, 5vw, 20vh);
+    }
 
-        color: var(--letter-color);
-        user-select: none;
-        display: inline-block;
-        text-decoration: none;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-
+    &:hover,
+    &:has(a.link#feed:focus) {
+      div.components {
         span {
-          margin: 0;
-          font-family: 'Rubik Mono One', monospace;
-          font-size: clamp(1rem, 10vw, 20vh);
-          transition: width var(--letter-expand-duration), margin var(--letter-expand-duration);
-          width: 1ch;
+          margin: 0 0.15ch;
 
-          display: inline-block;
-          vertical-align: bottom;
-          overflow: hidden;
-          height: 1lh;
-        }
-      }
-
-      &:hover,
-      &:has(a:focus) {
-        div#letters {
-
-          span#w,
-          span#t,
-          span#s {
-            margin: 0 0.15ch;
-          }
-
-          span#w {
+          &#watch {
             width: 5ch;
           }
 
-          span#t {
+          &#this {
             width: 4ch;
           }
 
-          span#s {
+          &#space {
             width: 5ch;
           }
-        }
-
-        a#feed {
-          height: 1.5lh;
         }
       }
     }

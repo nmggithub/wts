@@ -32,14 +32,15 @@ html {
         color: oklch(from var(--link-color) l c calc(h + 50))
       }
 
-      text-decoration-thickness: 0.1rem;
+      text-underline-offset: 0.15lh;
+      text-decoration-thickness: 0.1lh;
 
       &:hover,
       &:focus {
-        text-decoration-thickness: 0.15rem;
+        text-decoration-thickness: 0.15lh;
 
         &:active {
-          text-decoration-thickness: 0.2rem;
+          text-decoration-thickness: 0.2lh;
         }
       }
     }
