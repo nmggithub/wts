@@ -60,9 +60,6 @@ body#landing {
       }
 
       div#letters {
-        abbr {
-          text-decoration: none;
-        }
 
         color: var(--letter-color);
         user-select: none;
