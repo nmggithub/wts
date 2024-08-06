@@ -66,6 +66,11 @@ html {
         text-align: center;
         color: var(--accent-color);
       }
+
+      p {
+        line-height: 1.5rem;
+        margin: 2rem 0;
+      }
     }
   }
 }
