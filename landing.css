@@ -84,7 +84,8 @@ body#landing {
         }
       }
 
-      &:hover {
+      &:hover,
+      &:has(a:focus) {
         div#letters {
 
           span#w,

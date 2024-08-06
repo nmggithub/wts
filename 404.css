@@ -96,7 +96,8 @@ body#_404 {
         }
       }
 
-      &:hover {
+      &:hover,
+      &:has(a:focus) {
         div#numbers {
           span.number {
             width: 0;
