@@ -7,99 +7,111 @@
   --feed-link-color: var(--letter-color);
 }
 
-nav a {
-  position: fixed;
-  font-weight: 500;
-  font-size: 5vw;
-  padding: 2vw;
+body#landing {
+  a {
+    text-underline-offset: 1vw;
 
-  &#about {
-    bottom: 0;
-    left: 0;
-  }
+    text-decoration-thickness: 0.75vw;
 
-  &#posts {
-    bottom: 0;
-    right: 0;
-  }
-}
+    &:hover,
+    &:focus {
+      text-decoration-thickness: 1vw;
 
-main {
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  div#container {
-    text-align: center;
-
-    a#feed {
-      font-style: italic;
-      width: 100%;
-      font-weight: 500;
-      font-size: 5vw;
-      display: inline-block;
-      height: 0;
-      transition-property: height;
-      transition-duration: var(--subscribe-link-slide-duration);
-      transition-delay: var(--letter-expand-duration);
-      overflow: hidden;
-    }
-
-    div#letters {
-      abbr {
-        text-decoration: none;
-      }
-
-      color: var(--letter-color);
-      user-select: none;
-      display: inline-block;
-      text-decoration: none;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-
-      span#w,
-      span#t,
-      span#s {
-        margin: 0;
-        font-family: 'Rubik Mono One', monospace;
-        font-size: 10vw;
-        transition: width var(--letter-expand-duration), margin var(--letter-expand-duration);
-        width: 1ch;
-
-        display: inline-block;
-        vertical-align: bottom;
-        overflow: hidden;
-        height: 1lh;
+      &:active {
+        text-decoration-thickness: 1.25vw;
       }
     }
+  }
 
-    &:hover {
-      div#letters {
+  nav a {
+    position: fixed;
+    font-size: clamp(1rem, 5vw, 20vh);
 
-        span#w,
-        span#t,
-        span#s {
-          margin: 0 0.15ch;
-        }
+    &#about {
+      bottom: 2vw;
+      left: 2vw;
+    }
 
-        span#w {
-          width: 5ch;
-        }
+    &#posts {
+      bottom: 2vw;
+      right: 2vw;
+    }
+  }
 
-        span#t {
-          width: 4ch;
-        }
+  main {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-        span#s {
-          width: 5ch;
-        }
-      }
+    div#container {
+      text-align: center;
 
       a#feed {
-        height: 1lh;
+        font-style: italic;
+        width: 100%;
+        font-size: clamp(1rem, 5vw, 20vh);
+        display: inline-block;
+        height: 0;
+        transition-property: height;
+        transition-duration: var(--subscribe-link-slide-duration);
+        transition-delay: var(--letter-expand-duration);
+        overflow: hidden;
+      }
+
+      div#letters {
+        abbr {
+          text-decoration: none;
+        }
+
+        color: var(--letter-color);
+        user-select: none;
+        display: inline-block;
+        text-decoration: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+
+        span {
+          margin: 0;
+          font-family: 'Rubik Mono One', monospace;
+          font-size: clamp(1rem, 10vw, 20vh);
+          transition: width var(--letter-expand-duration), margin var(--letter-expand-duration);
+          width: 1ch;
+
+          display: inline-block;
+          vertical-align: bottom;
+          overflow: hidden;
+          height: 1lh;
+        }
+      }
+
+      &:hover {
+        div#letters {
+
+          span#w,
+          span#t,
+          span#s {
+            margin: 0 0.15ch;
+          }
+
+          span#w {
+            width: 5ch;
+          }
+
+          span#t {
+            width: 4ch;
+          }
+
+          span#s {
+            width: 5ch;
+          }
+        }
+
+        a#feed {
+          height: 1.5lh;
+        }
       }
     }
   }
