@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- -- Common -- -->
+  <base target="_blank" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="
+      default-src 'none';
+      style-src https://fonts.googleapis.com/ 'self';
+      font-src https://fonts.gstatic.com/;
+      img-src 'self';
+      form-action 'none'
+      " />
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/style.css" />
+  <!-- Twitter/X use the standard "name" attribute -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@wtsdev" />
+  <meta name="twitter:creator" content="@wtsdev" />
+  <!-- Facebook/OpenGraph use the non-standard "property" attribute -->
+  <meta property="og:site_name" content="Watch This Space" />
+  <meta property="og:image" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:secure_url" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="A large purple letter W on a light tan background" />
+  <!-- -- Page-Specific -- -->
+  <!-- Styles -->
+  <link rel="stylesheet" href="/post.css" />
+  <!-- URL -->
+  <link rel="canonical" href="https://wts.dev/posts/tcc-sql-injection/" />
+  <meta property="og:url" content="https://wts.dev/tcc-sql-injection/" />
+  <!-- Title -->
+  <meta name="og:title" content="SQL Injection in TCC: and why it (probably) wasn't a security risk (this time) | Watch This Space" />
+  <title>SQL Injection in TCC: and why it (probably) wasn't a security risk (this time) | Watch This Space</title>
+  <!-- Description -->
+  <meta name="description" content="A security research blog." />
+  <meta property="og:description" content="A security research blog." />
+  <!-- Additional -->
+  <meta property="og:type" content="article" />
+  <!-- Author -->
+  <meta property="article:author" content="https://github.com/nmggithub" />
+  <meta name="author" content="Noah Gregory" />
+  <!-- Keywords -->
+  <meta name="keywords" content="security,macos,tcc,sql,sql injection" />
+  <meta property="article:tag" content="security,macos,tcc,sql,sql injection" />
+</head>
+
+<body>
+  <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+      <h1 itemprop="headline">SQL Injection in TCC: and why it (probably) wasn't a security risk (this time)</h1>
+      <div id="about">
+        <time itemprop="datePublished" datetime="2024-09-16">2024-09-16</time>
+        <address itemprop="author" itemscope itemtype="https://schema.org/Person">
+          by <a itemprop="email" title="Send me and email" href="mailto:noahmgregory@gmail.com">
+            <span itemprop="name">Noah Gregory</span>
+          </a>
+        </address>
+      </div>
+    </header>
+    <h2>Prologue</h2>
+    <p>
+      This article is a disclosure of a bug that was patched in macOS Sequoia 15, released today. Despite the unpatched bug not posing a security risk, I would still recommend upgrading. Sequoia comes with many other security patches that are indeed security-critical. Also, the bug described in this article was <strong><em>not</em></strong> patched as part of the releases of macOS Sonoma 14.7 and macOS Ventura 13.7 that were also released today.
+    </p>
+    <p>
+      Additionally, everything in this article is my own work, unless otherwise cited. While I would like to thank the team at Apple Product Security for their prompt response and help with this bug (as well as <a href="https://support.apple.com/en-us/121238" title="About the security content of macOS Sequoia 15">their public recognition</a>), this article is written entirely independent of their input. I did not solicit their input for this article, and they were not even made aware of it prior to publication. Anyway, with that out of the way, onto the article!
+    </p>
+    <h2>Introduction</h2>
+    <p>
+      Prior to macOS Sequoia 15, there existed an SQL injection vulnerability in TCC. If you're not a security researcher that probably didn't make sense to you. If you are one, especially if you know what TCC is (or just if you know what SQL injection is), this statement is probably very concerning to you. However, in this article, I will show how the actual vulnerability did not pose a security risk. Whether or not this was due to sheer luck or intelligently-written code is something I'll leave up to the reader. But first, what is TCC?
+    </p>
+    <h2>Some Definitions</h2>
+    <h3>TCC</h3>
+    <p>
+      TCC is the permissions system built into macOS (as well as iOS). If you have ever seen a prompt from an app on macOS asking for permission to access your camera, documents, or other resources, that prompt was probably <em>actually</em> coming from TCC (specifically the TCC daemon: <code>tccd</code>). The TCC daemon is a separate system process that manages all the permissions given to apps on your device (although it prefers to use the term "service" internally instead of "permission").
+    </p>
+    <p>
+      TCC stands for <b>Transparency, Consent, and Control</b>. Probably. That's how many security researchers refer to it. However, I have never seen Apple themselves confirm this. Even in <a href="https://security.apple.com/bounty/categories/">their Security Bounty program documentation</a>, they refer to it as TCC. They seem to have never used "transparency, consent and control" to refer to the system nominally (at least, in any official capacity). They have, however, used the phrase.
+    </p>
+    <p>
+      In the help article <a href="https://support.apple.com/guide/security/controlling-app-access-to-files-secddd1d86a6/">Controlling app access to files in macOS</a>, Apple states (emphasis mine):
+    </p>
+    <blockquote>
+      Apple believes that users should have full <em>transparency, consent, and control</em> over what apps are doing with their data.
+    </blockquote>
+    <p>
+      This is likely where the phrase originated. For brevity, I will continue to refer to the system as TCC throughout this article.
+    </p>
+    <h3>SQL</h3>
+    <p>
+      If you already know what SQL and SQL injection is, you can skip to <a target="_self" title="skip the explanation of SQL and SQL injection" href="#tcc-sql">this part.</a> SQL, or <b>Structured Query Language</b> is a domain-specific language for managing data. A domain-specific language is a programming language that is designed to work within a specific subject area (i.e. a specific domain). SQL is widely popular and used across many database-management systems (or DBMS's).
+    </p>
+    <h4>Syntax</h4>
+    <p>
+      SQL syntax is mostly made up of verb-based statements, along with other keywords, with an SQL <b>query</b> being a collection of SQL <b>statements</b>. It is often surprisingly human-readable. For example, if this article were stored in a database, the query to get it would likely be something like this (note that a semicolon indicates the end of a statement):
+    </p>
+    <pre>
+      <code>
+SELECT * FROM articles WHERE id='1';
+      </code>
+    </pre>
+    <p>
+      An SQL <b>database</b> is a collection of <b>tables</b> with individual <b>rows</b>, with each table having one or more <b>columns</b>. The above query "selects" all (<code>*</code>) columns in the table named <code>articles</code> from rows where the column named <code>id</code> has a value of <code>1</code>. There's a lot more to SQL, but this general overview should hopefully be enough to understand the rest of this article.
+    </p>
+    <h4>SQL Injection</h4>
+    <p>
+      SQL has a problem that's fundamental to its status as a domain-specific language: without proper safeguards, it's prone to <b>SQL injection</b>. Specifically, given that SQL is domain-specific, it must integrate with more general-purpose languages when developing an application. SQL can't build a <abbr title="user interface">UI</abbr>, but a developer might want to use it to control aspects of that interface. To do so, they must integrate SQL with the language used to build the interface. And this is where problems can occur.
+    </p>
+    <p>
+      To take the above article example, let's say this article was hosted on a URL where one could change the ID number used in the query from the URL:
+    </p>
+    <pre>
+      <code>
+https://www.example.com/article?id=[x]
+      </code>
+    </pre>
+    <p>
+      You've probably seen this pattern before. While it may seem harmless at first, opening up the query to user input like this could allow end users to execute their own queries on the underlying database. If all the developer did was write code to copy the value of the <code>id</code> URL parameter directly into the SQL query, it would put too much control in the hands of users of the site.
+    </p>
+    <p>
+      URL parameters are not limited to numbers. If the developer used the simple copy method mentioned above, a user accessing this URL
+    </p>
+    <pre>
+      <code>
+https://www.example.com/article?id=1'
+      </code>
+    </pre>
+    <p>
+      would result in this query:
+    </p>
+    <pre>
+      <code>
+SELECT * FROM articles WHERE id='1'';
+      </code>
+    </pre>
+    <p>
+      As there is a mismatched number of quotes, this would actually be a syntax error in SQL. However, if a user were to instead type additional SQL statements in a way that would still be syntactically correct when copied into the original query, those SQL statements would potentially be executed on the database.
+    </p>
+    <p>
+      This leads to the general rule to <strong><em>never</em> blindly trust user input</strong> when developing applications. This rule applies even beyond SQL. Regardless, the current solution in SQL to avoid SQL injection is a concept known as <b>prepared statements</b>. Prepared statements are SQL statements that are specially made so that any user-provided parts are not read as anything other than data.
+    </p>
+    <h2 id="tcc-sql">How TCC uses SQL</h2>
+    <p>
+      TCC uses a library called <b><a href="https://www.sqlite.org/">SQLite</a></b> to manage its databases. Put simply, SQLite allows for a single file to contain an entire SQL database. This is in contrast to how most other SQL systems work, where the data itself is held in a much more complex format. Using files as databases greatly simplifies the process of data management.
+    </p>
+    <p>
+      TCC uses at least three different databases, stored at the following locations:
+    </p>
+    <ul>
+      <li><code>/Library/Application Support/com.apple.TCC/TCC.db</code></li>
+      <li><code>/Library/Application Support/com.apple.TCC/REG.db</code></li>
+      <li><code>/Users/[username]/Application Support/com.apple.TCC/TCC.db</code></li>
+    </ul>
+    <p>
+      The third one is specific to each user (i.e. each user has their own <code>TCC.db</code>). The <code>TCC.db</code> databases contain information about the permissions granted or denied to each app on a system-wide or per-user basis (respectively). You might think it's dangerous to have such a file out in the open in the user's files, but thankfully it's <em>very</em> protected. The directories containing these files aren't even readable under most circumstances. There are ways around these restrictions, but they often require certain TCC permissions, basically creating a catch-22.
+    </p>
+    <p>
+      The <code>REG.db</code> database contains a list of known <code>TCC.db</code> files. This appears to be a response to complex attacks where a hacker plants a fake <code>TCC.db</code> file and attempts to get TCC to use it. If a <code>TCC.db</code> database is not listed in <code>REG.db</code>, TCC will refuse to use it and will likely even delete it. Note that I am skimming over details here that aren't entirely important, but this is the basic gist. Regardless, it was the <code>REG.db</code> database (or, more specifically, a query into that database) that was vulnerable to SQL injection.
+    </p>
+    <h2>The Vulnerability</h2>
+    <h3>Frameworks</h3>
+    <p>
+      macOS provides many collections of code in the form of <a href="https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/OSX_Technology_Overview/SystemFrameworks/SystemFrameworks.html">frameworks.</a> These frameworks can be linked into existing code and provide additional functionality. In addition to the public frameworks located in the <code>/System/Library/Frameworks/</code> directory, there are many private frameworks located in the <code>/System/Library/PrivateFrameworks/</code> directory. While these frameworks are not meant to be used directly, there is nothing in the development toolchain that stops them from being used.
+    </p>
+    <p>
+      The private framework located at <code>/System/Library/PrivateFrameworks/TCC.framework</code> includes many functions for interacting with the TCC daemon. Behind the scenes, these functions <a href="https://developer.apple.com/documentation/xpc/1448799-xpc_connection_send_message">send XPC messages</a> to <code>tccd</code>. XPC is a public API, so these functions (and the framework itself) aren't necessarily needed, but it definitely doesn't hurt. Anyway, it was one of these functions that was vulnerable to SQL injection.
+    </p>
+    <h3>The Vulnerable Function</h3>
+    <p>
+      While I won't name it directly here, the function is easily findable in the private TCC framework. What this function did, specifically, was take a user-provided string and see if it matches the path of any known databases in the <code>REG.db</code> database. This was the query the handler code in <code>tccd</code> used:
+    </p>
+    <pre>
+      <code>
+SELECT * FROM registry WHERE abs_path = '%s';
+      </code>
+    </pre>
+    <p>
+      The <code>%s</code> is replaced with the user-provided string through the use of <a href="https://developer.apple.com/documentation/foundation/nsstring/1497275-stringwithformat"><code>stringWithFormat:</code></a>. This allowed any user to input additional SQL code into the query. This would have been potentially devastating. While the query was connected to the least security-critical database in TCC, SQLite does include an <a href="https://www.sqlite.org/lang_attach.html"><code>ATTACH DATABASE</code> statement</a> that could have attached an additional database (perhaps one of the <code>TCC.db</code> ones) and allowed queries to be executed on it. However, the way SQLite was used in this case made it impossible to execute anything more than the initial <code>SELECT</code> statement.
+    </p>
+    <h2>Why This Wasn't a Security Risk</h2>
+    <p>
+      SQLite provides two methods of executing SQL statements:
+    </p>
+    <ul>
+      <li>The <a href="https://www.sqlite.org/c3ref/exec.html"><code>sqlite3_exec()</code> function,</a> that executes one or more statements, and</li>
+      <li>The <a href="https://www.sqlite.org/c3ref/prepare.html"><code>sqlite3_prepare*()</code> family of functions,</a> that each compile a prepared statement to be stepped through with the <a href="https://www.sqlite.org/c3ref/step.html"><code>sqlite3_step()</code> function.</a></li>
+    </ul>
+    <p>
+      The vulnerable function in this case used the latter method. You might think that, because it's a prepared statement, it's immune to SQL injection. However, I glossed over some details earlier. In order for user-provided values to never be treated as code, they must be <a href="https://www.sqlite.org/c3ref/bind_blob.html">bound to the prepared statement with the <code>sqlite3_bind_*()</code> family of functions.</a> They cannot simply be put directly into the statement as SQLite would not be able to know which part of the query is user-provided. This bind step (which is also often used in other SQL systems) was missed in this case.
+    </p>
+    <p>
+      While this did allow for SQL injection, given that a <code>sqlite3_prepare*()</code> function was used, only the <code>SELECT</code> statement is ever executable. These functions were meant to work with only single statements, so any additional statements after the first semicolon are ignored. Thus, all a malicious actor could do is modify the <code>SELECT</code> statement. Given that <code>SELECT</code> statements are generally non-mutating (they don't change data), and that <code>REG.db</code> database is the least security-critical database in TCC, I concluded that this did not pose a security risk to users. Apple seems to have agreed, as they thanked me in <a href="https://support.apple.com/en-us/121238">their security bulletin for macOS Sequoia 15</a> under the "Additional recognition" section and not with the lists of specific vulnerabilities.
+    </p>
+    <h2>Conclusion</h2>
+    <h3>Summary</h3>
+    <p>
+      In short, this vulnerability was an SQL injection vulnerability…
+    </p>
+    <ul>
+      <li>…limited to a single non-mutating <code>SELECT</code> statement…</li>
+      <li>…in the least security-critical database…</li>
+      <li><strong><em>…in the core permissions system for user data security on macOS.</em></strong></li>
+    </ul>
+    <p>
+      That's two points in its favor and one against. Two out of three isn't <em>that</em> bad of a score. It's not a <em>great</em> score either, though.
+    </p>
+    <h3>Was This Luck?</h3>
+    <p>
+      This brings us back to the question I posed at the beginning of this article. Was it luck or intelligently-written code that made this not a security risk? While this might be a false dichotomy (and at the risk of tipping the scale a bit), it is my personal belief is that the lack of a specific security risk here <em>did</em> include a not-insignificant amount of luck.
+    </p>
+    <p>
+      SQLite does include <a href="https://sqlite.org/lang_corefunc.html">some functions that can be included as part of <code>SELECT</code> statements.</a> While most of these functions are trivial, it's theoretical there could be some combination of them that could lead to a dangerous <code>SELECT</code> statement. However, I was unable to find such a combination in my research. SQLite, for all intents and purposes, appears to be a very secure library. There seems to be <a href="https://www.sqlite.org/cves.html">only a handful of recent vulnerabilities,</a> many of them not even in the core library itself. However, it's still not good that such injection was possible in TCC.
+    </p>
+    <p>
+      Additionally, if the <code>sqlite3_prepare*()</code> family of functions did not operate on single statements at a time, this would have allowed for multiple statements to be injected. If that were possible, it could have potentially lead to a full compromise of TCC. The fact that the <code>sqlite3_prepare*()</code> functions operate on single statements is an implicit guarantee, not an explicit one. While it is a very understandable way the functions would work, it's rarely a good idea to operate based on implicit guarantees.
+    </p>
+    <h3>How Did Apple Fix It?</h3>
+    <p>
+      Apple now use the following query:
+      <pre>
+        <code>
+  SELECT * FROM registry WHERE abs_path = ?;
+        </code>
+      </pre>
+<p>
+  They also removed the use of <code>stringWithFormat:</code> to replace the <code>%s</code> in the old query, and instead used a call to <code>sqlite3_bind_text()</code> to bind the user-provided string to the <code>?</code> in the new query. This new method use the prepared statements feature of SQLite properly and avoids any potential SQL injection.
+</p>
+    </p>
+    <h2>Epilogue</h2>
+    <p>
+      Thank you to everyone who took the time to read my first article. It really means a lot to me and I hope to write many more in the future. To keep up to date with the happenings here, <a target="_self" href="/feed.xml">watch this space.</a>
+    </p>
+  </article>
+</body>
+
+</html>
