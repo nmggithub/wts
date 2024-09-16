@@ -4,7 +4,7 @@
   <atom:title>Watch This Space</atom:title>
   <atom:subtitle>A security research blog.</atom:subtitle>
   <atom:updated>2024-08-05T06:49:44-04:00</atom:updated>
-  <atom:id>https://wts.dev</atom:id>
+  <atom:id>https://wts.dev/</atom:id>
   <atom:icon>https://wts.dev/favicon.png</atom:icon>
   <atom:logo>https://wts.dev/logo.png</atom:logo>
   <atom:link href="https://wts.dev/feed.xml" rel="self" />
