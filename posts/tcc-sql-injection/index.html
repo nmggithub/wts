@@ -72,7 +72,7 @@
     </p>
     <h2>Introduction</h2>
     <p>
-      Prior to macOS Sequoia 15, there existed an SQL injection vulnerability in TCC. If you're not a security researcher that probably didn't make sense to you. If you are one, especially if you know what TCC is (or just if you know what SQL injection is), this statement is probably very concerning to you. However, in this article, I will show how the actual vulnerability did not pose a security risk. Whether or not this was due to sheer luck or intelligently-written code is something I'll leave up to the reader. But first, what is TCC?
+      Prior to macOS Sequoia 15, there existed an SQL injection vulnerability in TCC. If you're not a security researcher that probably didn't make sense to you. If you are one, especially if you know what TCC is (or just if you know what SQL injection is), this statement is probably very concerning to you. However, in this article, I will show how the actual vulnerability did not pose a security risk. Whether this was due to sheer luck or intelligently-written code is something I'll leave up to the reader. But first, what is TCC?
     </p>
     <h2>Some Definitions</h2>
     <h3>TCC</h3>
@@ -139,7 +139,7 @@ SELECT * FROM articles WHERE id='1'';
       </code>
     </pre>
     <p>
-      As there is a mismatched number of quotes, this would actually be a syntax error in SQL. However, if a user were to instead type additional SQL statements in a way that would still be syntactically correct when copied into the original query, those SQL statements would potentially be executed on the database.
+      As there is a mismatched number of quotes, this would actually be a syntax error in SQL. However, if a user were to instead write additional SQL statements in a way that would still be syntactically correct when copied into the original query, those SQL statements would potentially be executed on the database.
     </p>
     <p>
       This leads to the general rule to <strong><em>never</em> blindly trust user input</strong> when developing applications. This rule applies even beyond SQL. Regardless, the current solution in SQL to avoid SQL injection is a concept known as <b>prepared statements</b>. Prepared statements are SQL statements that are specially made so that any user-provided parts are not read as anything other than data.
