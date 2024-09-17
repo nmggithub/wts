@@ -65,10 +65,19 @@ html {
       }
 
       p {
+        overflow: scroll;
         font-size: 1rem;
 
         &:has(+ ul) {
           margin-bottom: 0;
+        }
+      }
+      
+      ul, ol {
+        overflow: scroll;
+        & > li {
+          margin: 0.5rem 0;
+          line-height: 2rem;
         }
       }
 
