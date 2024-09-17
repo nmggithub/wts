@@ -228,7 +228,7 @@ SELECT * FROM registry WHERE abs_path = '%s';
         </code>
       </pre>
 <p>
-  They also removed the use of <code>stringWithFormat:</code> to replace the <code>%s</code> in the old query, and instead used a call to <code>sqlite3_bind_text()</code> to bind the user-provided string to the <code>?</code> in the new query. This new method use the prepared statements feature of SQLite properly and avoids any potential SQL injection.
+  They also removed the use of <code>stringWithFormat:</code> to replace the <code>%s</code> in the old query, and instead used a call to <code>sqlite3_bind_text()</code> to bind the user-provided string to the <code>?</code> in the new query. This new method uses the prepared statements feature of SQLite properly and avoids any potential SQL injection.
 </p>
     </p>
     <h2>Epilogue</h2>
