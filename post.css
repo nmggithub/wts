@@ -65,7 +65,7 @@ html {
       }
 
       p {
-        overflow: scroll;
+        overflow-x: auto;
         font-size: 1rem;
 
         &:has(+ ul) {
@@ -74,7 +74,7 @@ html {
       }
       
       ul, ol {
-        overflow: scroll;
+        overflow-x: auto;
         & > li {
           margin: 0.5rem 0;
           line-height: 2rem;
@@ -141,7 +141,7 @@ html {
           background-color: unset;
           border-radius: unset;
           padding: 0.75rem var(--code-padding-x);
-          overflow: scroll;
+          overflow-x: auto;
           width: 100%;
           display: inline-block;
         }
