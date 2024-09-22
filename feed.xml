@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE feed>
-<atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
-  <atom:title>Watch This Space</atom:title>
-  <atom:subtitle>A security research blog.</atom:subtitle>
-  <atom:updated>2024-09-16T19:51:03-04:00</atom:updated>
-  <atom:id>https://wts.dev/</atom:id>
-  <atom:icon>https://wts.dev/favicon.png</atom:icon>
-  <atom:logo>https://wts.dev/logo.png</atom:logo>
-  <atom:link href="https://wts.dev/feed.xml" rel="self" />
-  <atom:link href="https://wts.dev" />
-  <atom:author>
-    <atom:name>Noah Gregory</atom:name>
-    <atom:email>noahmgregory@gmail.com</atom:email>
-    <atom:uri>https://github.com/nmggithub</atom:uri>
-  </atom:author>
-  <atom:entry>
-    <atom:title>SQL Injection in TCC: and why it (probably) wasn't a security risk (this time)</atom:title>
+<feed xmlns:atom="http://www.w3.org/2005/Atom">
+  <title>Watch This Space</title>
+  <subtitle>A security research blog.</subtitle>
+  <updated>2024-09-16T19:51:03-04:00</updated>
+  <id>https://wts.dev/</id>
+  <icon>https://wts.dev/favicon.png</icon>
+  <logo>https://wts.dev/logo.png</logo>
+  <link href="https://wts.dev/feed.xml" rel="self" />
+  <link href="https://wts.dev" />
+  <author>
+    <name>Noah Gregory</name>
+    <email>noahmgregory@gmail.com</email>
+    <uri>https://github.com/nmggithub</uri>
+  </author>
+  <entry>
+    <title>SQL Injection in TCC: and why it (probably) wasn't a security risk (this time)</title>
     <link href="https://wts.dev/posts/tcc-sql-injection" rel="alternate" />
-    <atom:id>urn:uuid:37a37bc4-9184-4c25-99dd-fe36056b2568</atom:id>
-    <atom:published>2024-09-16T19:51:03-04:00</atom:published>
-    <atom:updated>2024-09-16T19:51:03-04:00</atom:updated>
-    <atom:category term="Security" />
-    <atom:category term="macOS" />
-    <atom:category term="TCC" />
-    <atom:category term="SQL" />
-    <atom:category term="SQL Injection" />
-  </atom:entry>
-</atom:feed>
+    <id>urn:uuid:37a37bc4-9184-4c25-99dd-fe36056b2568</id>
+    <published>2024-09-16T19:51:03-04:00</published>
+    <updated>2024-09-16T19:51:03-04:00</updated>
+    <category term="Security" />
+    <category term="macOS" />
+    <category term="TCC" />
+    <category term="SQL" />
+    <category term="SQL Injection" />
+  </entry>
+</feed>
