@@ -53,6 +53,7 @@ html {
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      text-align: justify;
 
 
       h1,

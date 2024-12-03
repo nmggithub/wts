@@ -6,7 +6,6 @@ html {
     width: 100%;
 
     article.post {
-      text-align: justify;
       
       header {
         text-align: center;
