@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://wts.dev/</loc>
+  </url>
+  <url>
+    <loc>https://wts.dev/about/</loc>
+  </url>
+  <url>
+    <loc>https://wts.dev/posts/</loc>
+  </url>
+  <url>
+    <loc>https://wts.dev/posts/tcc-sql-injection/</loc>
+  </url>
+  <url>
+    <loc>https://wts.dev/posts/CVE-2024-54471-primer/</loc>
+  </url>
+</urlset> 
