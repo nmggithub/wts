@@ -1,2 +1,2 @@
 User-agent: *
-Disallow: .well-known/atproto-did
+Disallow: /.well-known/atproto-did
