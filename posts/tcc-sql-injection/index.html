@@ -213,7 +213,7 @@ SELECT * FROM registry WHERE abs_path = '%s';
     </p>
     <h3>Was This Luck?</h3>
     <p>
-      This brings us back to the question I posed at the beginning of this article. Was it luck or intelligently-written code that made this not a security risk? While this might be a false dichotomy (and at the risk of tipping the scale a bit), it is my personal belief is that the lack of a specific security risk here <em>did</em> include a not-insignificant amount of luck.
+      This brings us back to the question I posed at the beginning of this article. Was it luck or intelligently-written code that made this not a security risk? While this might be a false dichotomy (and at the risk of tipping the scale a bit), it is my personal belief that the lack of a specific security risk here <em>did</em> include a not-insignificant amount of luck.
     </p>
     <p>
       SQLite does include <a href="https://sqlite.org/lang_corefunc.html">some functions that can be included as part of <code>SELECT</code> statements.</a> While most of these functions are trivial, it's theoretical there could be some combination of them that could lead to a dangerous <code>SELECT</code> statement. However, I was unable to find such a combination in my research. SQLite, for all intents and purposes, appears to be a very secure library. There seems to be <a href="https://www.sqlite.org/cves.html">only a handful of recent vulnerabilities,</a> many of them not even in the core library itself. However, it's still not good that such injection was possible in TCC.
