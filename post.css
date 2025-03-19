@@ -136,9 +136,7 @@ html {
               rgba(0, 0, 0, 1) var(--code-padding-x),
               rgba(0, 0, 0, 1) calc(100% - var(--code-padding-x)),
               rgba(0, 0, 0, 0) 100%);
-          /* hide the top and bottom line breaks */
-          margin-top: -1lh;
-          margin-bottom: -1lh;
+          margin: 0;
           background-color: unset;
           border-radius: unset;
           padding: 0.75rem var(--code-padding-x);
@@ -146,7 +144,6 @@ html {
           width: 100%;
           display: inline-block;
         }
-
       }
     }
   }
