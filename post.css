@@ -145,6 +145,10 @@ html {
           display: inline-block;
         }
       }
+      
+      img {
+        object-fit: contain;
+      }
     }
   }
 }
