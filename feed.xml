@@ -38,7 +38,7 @@
   <entry>
     <title>Leaking Passwords (and more!) on macOS</title>
     <link href="https://wts.dev/posts/password-leak" rel="alternate" />
-    <id>e964aeb9-5e67-4196-8650-68b043af7edf</id>
+    <id>urn:uuid:e964aeb9-5e67-4196-8650-68b043af7edf</id>
     <published>2025-03-20Z15:34:37+00:00</published>
     <updated>2025-03-20Z15:34:37+00:00</updated>
     <category term="Security" />
