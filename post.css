@@ -90,10 +90,6 @@ html {
         position: relative;
         display: block;
 
-        &>pre {
-          white-space: pre-wrap;
-        }
-
         &::before {
           content: '';
           position: absolute;
