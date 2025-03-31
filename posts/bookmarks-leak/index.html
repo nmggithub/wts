@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+
+<head>
+  <!-- -- Common -- -->
+  <base target="_blank" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="
+      default-src 'none';
+      style-src https://fonts.googleapis.com/ 'self';
+      font-src https://fonts.gstatic.com/;
+      img-src 'self';
+      form-action 'none'
+      " />
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/style.css" />
+  <!-- Twitter/X use the standard "name" attribute -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@wtsdev" />
+  <meta name="twitter:creator" content="@wtsdev" />
+  <!-- Facebook/OpenGraph use the non-standard "property" attribute -->
+  <meta property="og:site_name" content="Watch This Space" />
+  <meta property="og:image" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:secure_url" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="A large purple letter W on a light tan background" />
+  <!-- -- Page-Specific -- -->
+  <!-- Styles -->
+  <link rel="stylesheet" href="/post.css" />
+  <!-- URL -->
+  <link rel="canonical" href="https://wts.dev/posts/bookmarks-leak/" />
+  <meta property="og:url" content="https://wts.dev/posts/bookmarks-leak/" />
+  <!-- Title -->
+  <meta name="og:title" content="CVE-2025-24259: Leaking Bookmarks on macOS | Watch This Space" />
+  <title>CVE-2025-24259: Leaking Bookmarks on macOS | Watch This Space</title>
+  <!-- Description -->
+  <meta name="description" content="A security research blog." />
+  <meta property="og:description" content="A security research blog." />
+  <!-- Additional -->
+  <meta property="og:type" content="article" />
+  <!-- Author -->
+  <meta property="article:author" content="https://github.com/nmggithub" />
+  <meta name="author" content="Noah Gregory" />
+  <!-- Keywords -->
+  <meta name="keywords" content="security,macos,leaking,bookmarks,safari,CVE-2025-24259" />
+  <meta property="article:tag" content="security,macos,leaking,bookmarks,safari,CVE-2025-24259" />
+</head>
+
+<body>
+  <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+      <h1 itemprop="headline">CVE-2025-24259: Leaking Bookmarks on macOS</h1>
+      <div id="about">
+        <time itemprop="datePublished" datetime="2025-03-31">2025-03-31</time>
+        <address itemprop="author" itemscope itemtype="https://schema.org/Person">by <a itemprop="email" title="Send me and email" href="mailto:noah@wts.dev"><span itemprop="name">Noah Gregory</span></a>
+      </div>
+    </header>
+    <h2>A Quick Summary</h2>
+    <p>Happy Monday! You should probably update your Macs now. <a href="https://support.apple.com/en-us/122375">macOS Ventura 13.7.5</a>, <a href="https://support.apple.com/en-us/122374">macOS Sonoma 14.7.5</a>, and <a href="https://support.apple.com/en-us/122373">macOS Sequoia 15.4</a>, are out. They include a lot of patches, with 15.4 including patches for <a href="https://x.com/ClassicII_MrMac/status/1906782483942666496">131 CVE's.</a> If you're curious and want to validate that, just open the security release notes for that update and search for the string <q>CVE-202</q>. You'll find 131 matches on that page as of writing.</p>
+    <p>One of those CVE's, <b>CVE-2025-24259</b>, allowed root processes to leak the Safari bookmarks for any user.</p>
+    <h2>A Brief Recap</h2>
+    <p>For those of you who didn't read <a href="/posts/password-leak/">my last write-up</a>, here is the basic gist:</p>
+    <ol>
+      <li>Processes on macOS communicate with each other via <b>Mach messages</b>.</li>
+      <li><b>MIG (the Mach Interface Generator)</b> can generate code for <abbr title="remote procedure call">RPC</abbr>-style API's around Mach messages.</li>
+      <li>Process executables can be signed with key-value pairs called <b><a href="https://developer.apple.com/documentation/bundleresources/entitlements">entitlements</a></b>.</li>
+      <li>A kernel module called <abbr title="Apple Mobile File Integrity">AMFI</abbr> scans the entitlements of <em>every</em> process launched and immediately kills those that are signed with <q>restricted entitlements</q> they lack the proper <b>provisioning profile</b> for.</li>
+      <li>Any process that is running on a macOS device must have made it past that kernel module, and therefore it can be assumed that its entitlements dictionary can be trusted.</li>
+      <li>A Mach message include a kernel-appended trailer, which contains (among other things) an <b>audit token</b> that can be used by the receiver to uniquely identify the sending process and read its entitlements.</li>
+      <li>Mach messages receivers <em>should</em> utilize this, and ignore messages from un-entitled senders.</li>
+      <li><strong>Some receivers don't do this.</strong></li>
+    </ol>
+    <h2>On MIG Client Code</h2>
+    <p>As I explained in my previous write-up, Mach message senders are usually called <b>clients</b>, which Mach message receivers are usually called <b>servers</b>. Take a look at that write-up if you are curious as to why this is the case. Anyway, as mentioned above, MIG can generate code for functional interfaces around Mach messages. In my previous write-up, I mimicked client code to send Mach messages to a daemon that didn't check entitlements, allowing me to access restricted resources. This write-up is more of the same, but we're going to save some time by not writing the client code ourselves.</p>
+    <h2>The Parental/Family Controls Daemon</h2>
+    <p>The <q>parental controls</q> daemon is a MIG daemon on macOS that lives at:</p>
+    <pre><code>/System/Library/PrivateFrameworks/FamilyControls.framework/Resources/parentalcontrolsd</code></pre>
+    <p>The daemon itself, of course, contains the MIG server code. The MIG client code lives inside the <code>FamilyControls</code> framework it is contained in. This is a fairly common pattern I have seen with daemons, and having existing client code can be very helpful for security research. Sure, we could re-create the client code in our <abbr title="proof-of-concept">PoC</abbr>, but sometimes it's much simpler to just use the already-existing client code.</p>
+    <h2>Proof-Of-Concept</h2>
+    <p>While my <b><a href="https://www.github.com/nmggithub/Kass">Kass</a></b> tooling I used in my previous write-up <em>does</em> include <a href="https://swiftpackageindex.com/nmggithub/Kass/v4.2.1/documentation/linking">a nice wrapper around dynamic linking,</a> it's not strictly necessary. We can use the standard <code>dlopen</code>/<code>dlsym</code> calls to bring in the MIG client code from the <code>FamilyControls</code> framework and call it. It really doesn't take that many lines of Swift:</p>
+    <pre><code>import Foundation
+
+if getuid() != 0 {
+    print("This program should be run as root.")
+    exit(1)
+}
+
+if CommandLine.argc != 2 { 
+    print("Usage: \(String(cString: getprogname()!, encoding: .utf8)!) &lt;username&gt;")
+    exit(1)
+}
+
+let fFamilyControls =
+    dlopen("/System/Library/PrivateFrameworks/FamilyControls.framework/FamilyControls", RTLD_LAZY)!
+let FCSafariCopyExistingBookmarks
+    = unsafeBitCast(
+        dlsym(fFamilyControls, "FCSafariCopyExistingBookmarks"),
+        to: (@convention(c) (String, Data) -> AnyObject?).self
+    )
+print(FCSafariCopyExistingBookmarks(CommandLine.arguments[1], Data()) as AnyObject)</code></pre>
+    <p>Compiling the above code with <code>swiftc</code> and running the resulting executable as root would print out the Safari bookmarks of the specified user. I only tested against a single user in my tests, but I don't see why this would not work for all users on the device (especially as it is the daemon itself that is accessing the bookmarks, and it should have read-access to them all, regardless of the user).</p>
+    <p>For those wondering, the second argument of <code>FCSafariCopyExistingBookmarks</code> takes in a <code><a href="https://developer.apple.com/documentation/foundation/data">Data</a></code> object representing the bytes of an <code><a href="https://developer.apple.com/documentation/security/authorizationexternalform">AuthorizationExternalForm</a></code>, which could be used to authorize the copying of the bookmarks. However, in the absence of a valid authorization object, <code>parentalcontrolsd</code> would still allow root callers to copy the bookmarks, so we pass an empty <code>Data</code> object.</p>
+    <h2>Apple's Solution</h2>
+    <p>Apple's solution here was, again, adding an entitlement check. Now, <code>parentalcontrolsd</code> will ignore clients that don't have the <code>com.apple.private.parentalcontrols</code> entitlement key with a boolean value of <code>true</code> when they try to call that specific MIG routine to copy Safari bookmarks.</p>
+    <h2>Conclusion</h2>
+    <p>This, again, underscores the importance of validating senders before acting on Mach messages. Like my last write-up, this was a simple vulnerability with a simple solution, and I'm glad it's patched.</p>
+    <p>As always... <a target="_self" href="/feed.xml">watch this space.</a></p>
+  </article>
+</body>
+
+</html>

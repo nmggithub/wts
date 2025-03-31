@@ -48,4 +48,17 @@
     <category term="NetAuthAgent" />
     <category term="CVE-2024-54471" />
   </entry>
+  <entry>
+    <title>CVE-2025-24259: Leaking Bookmarks on macOS</title>
+    <link href="https://wts.dev/posts/bookmarks-leak" rel="alternate" />
+    <id>urn:uuid:35fc8dff-dcc5-499a-a8b2-4a5db432a2ed</id>
+    <published>2025-03-31Z20:08:23+00:00</published>
+    <updated>2025-03-31Z20:08:23+00:00</updated>
+    <category term="Security" />
+    <category term="macOS" />
+    <category term="leaking" />
+    <category term="bookmarks" />
+    <category term="Safari" />
+    <category term="CVE-2025-24259" />
+  </entry>
 </feed>

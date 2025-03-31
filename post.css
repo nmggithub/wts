@@ -108,6 +108,13 @@ html {
       code {
         padding: 0.1rem 0.25rem;
         white-space: nowrap;
+        a {
+          color: oklch(from var(--link-color) calc(l + 0.25) c h);
+
+          &:visited {
+            color: oklch(from var(--link-color) calc(l + 0.25) c calc(h + 50))
+          }
+        }
       }
 
       code,
