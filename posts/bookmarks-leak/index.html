@@ -67,7 +67,7 @@
     <ol>
       <li>Processes on macOS communicate with each other via <b>Mach messages</b>.</li>
       <li><b>MIG (the Mach Interface Generator)</b> can generate code for <abbr title="remote procedure call">RPC</abbr>-style API's around Mach messages.</li>
-      <li>Process executables can be signed with key-value pairs called <b><a href="https://developer.apple.com/documentation/bundleresources/entitlements">entitlements</a></b>.</li>
+      <li>Process executables can be signed with key-value pairs called <b><a href="https://developer.apple.com/documentation/bundleresources/entitlements">entitlements.</a></b></li>
       <li>A kernel module called <abbr title="Apple Mobile File Integrity">AMFI</abbr> scans the entitlements of <em>every</em> process launched and immediately kills those that are signed with <q>restricted entitlements</q> they lack the proper <b>provisioning profile</b> for.</li>
       <li>Any process that is running on a macOS device must have made it past that kernel module, and therefore it can be assumed that its entitlements dictionary can be trusted.</li>
       <li>A Mach message include a kernel-appended trailer, which contains (among other things) an <b>audit token</b> that can be used by the receiver to uniquely identify the sending process and read its entitlements.</li>
