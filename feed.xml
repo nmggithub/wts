@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Watch This Space</title>
   <subtitle>A security research blog.</subtitle>
-  <updated>2024-09-16T19:51:03-04:00</updated>
+  <updated>2025-05-12Z18:23:20+00:00</updated>
   <id>https://wts.dev/</id>
   <icon>https://wts.dev/favicon.png</icon>
   <logo>https://wts.dev/logo.png</logo>
@@ -60,5 +60,17 @@
     <category term="bookmarks" />
     <category term="Safari" />
     <category term="CVE-2025-24259" />
+  </entry>
+  <entry>
+    <title>CVE-2025-24259: Leaking Bookmarks on macOS</title>
+    <link href="https://wts.dev/posts/bookmarks-leak" rel="alternate" />
+    <id>urn:uuid:c66e84f9-534f-4cc6-ac0a-3d05fdd6d6f9</id>
+    <published>2025-05-12Z18:23:20+00:00</published>
+    <updated>2025-05-12Z18:23:20+00:00</updated>
+    <category term="Security" />
+    <category term="macOS" />
+    <category term="TCC" />
+    <category term="Apple Events" />
+    <category term="CVE-2025-31250" />
   </entry>
 </feed>
