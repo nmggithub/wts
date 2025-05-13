@@ -84,8 +84,13 @@
       </div>
       <img alt="A dialog box that reads 'System Settings would like to administer your computer. Administration can include modifying passwords, networking, and system settings.'" src="consent-prompt.png" height="700">
     </header>
+    <h2>Important Correction</h2>
+    <p>A previous version of this article mentioned below that this CVE was patched in <q>macOS Sequoia 15.5 et al.</q>, but I was a bit mistaken in that. Despite being release today as well, it appears that macOS Ventura 13.7.6 and macOS Sonoma 14.7.6 are <strong><em>not</em></strong> patched against this vulnerability.</p>
+    <p>I wrote that sentence assuming that Apple would have included it in all of the releases. It was only later, when I checked <a href="https://support.apple.com/en-us/100100">the security release notes</a>, that I saw I was not credited under the other two releases. I reached out to Apple to clarify of these releases were patched. As of writing, I have not heard back.</p>
+    <p>I chose to do my own testing and spun up a virtual machine. After some difficulties I got it updated to macOS Sonoma 14.7.6 and was able to compile and run my proof of concept. It still worked. I would assume the same is true for macOS Ventura 13.7.6. I'm not sure why Apple didn't include the patch in these two releases.</p>
+    <p>I will update this post when I have more information and/or context.</p>
     <h2>Introduction</h2>
-    <p>It's time to update your Macs again! This time, I'm not burying the lede. <b>CVE-2025-31250</b>, which was patched in today's releases of macOS Sequoia 15.5 et al., allowed for…</p>
+    <p>It's time to update your Macs again! This time, I'm not burying the lede. <b>CVE-2025-31250</b>, which was patched in today's releases of macOS Sequoia 15.5, allowed for…</p>
     <ol>
       <li>…any <b>Application A</b> to make macOS show a permission consent prompt…</li>
       <li>…appearing as if it were coming from any <b>Application B</b>…</li>
