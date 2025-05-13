@@ -229,7 +229,7 @@
               // We copy the buffer to a new pointer as, per the documentation, the buffer pointer is only valid
               // within the block. This new pointer, while it is defined within the block, should not be subject
               // to the same restrictions (hopefully), so it should be safe to put into the XPC dictionary.
-              let newPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferPointer.count)
+              let newPointer = UnsafeMutablePointer&lt;UInt8&gt;.allocate(capacity: bufferPointer.count)
               newPointer.initialize(
                   from: baseAddress.bindMemory(to: UInt8.self, capacity: bufferPointer.count),
                   count: bufferPointer.count
