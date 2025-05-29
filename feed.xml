@@ -62,8 +62,8 @@
     <category term="CVE-2025-24259" />
   </entry>
   <entry>
-    <title>CVE-2025-24259: Leaking Bookmarks on macOS</title>
-    <link href="https://wts.dev/posts/bookmarks-leak" rel="alternate" />
+    <title>Can You Really Trust That Permission Pop-Up On macOS? (CVE-2025-31250)</title>
+    <link href="https://wts.dev/posts/tcc-who" rel="alternate" />
     <id>urn:uuid:c66e84f9-534f-4cc6-ac0a-3d05fdd6d6f9</id>
     <published>2025-05-12Z18:23:20+00:00</published>
     <updated>2025-05-14Z18:09:11+00:00</updated>
