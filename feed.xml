@@ -73,4 +73,15 @@
     <category term="Apple Events" />
     <category term="CVE-2025-31250" />
   </entry>
+  <entry>
+    <title>CVE-2025-43253: Bypassing Launch Constraints on macOS</title>
+    <link href="https://wts.dev/posts/bypassing-launch-constraints/" rel="alternate" />
+    <id>urn:uuid:f65cfdc9-2fa7-4c0a-ae6c-8c2838142135</id>
+    <published>2025-07-31T14:07:03-04:00</published>
+    <updated>2025-07-31T14:07:03-04:00</updated>
+    <category term="Security" />
+    <category term="macOS" />
+    <category term="Launch Constraints" />
+    <category term="CVE-2025-43253" />
+  </entry>
 </feed>

