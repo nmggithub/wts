@@ -84,4 +84,16 @@
     <category term="Launch Constraints" />
     <category term="CVE-2025-43253" />
   </entry>
+    <entry>
+    <title>I wrote an Objective-C bridge for Node.js. Don't use it.</title>
+    <link href="https://wts.dev/posts/nobjc/" rel="alternate" />
+    <id>urn:uuid:6cf37816-73c6-455a-a399-bfa5ef5d629b</id>
+    <published>2025-10-03T16:17:24-04:00</published>
+    <updated>2025-10-03T16:17:24-04:00</updated>
+    <category term="Security" />
+    <category term="macOS" />
+    <category term="Node.js" />
+    <category term="Objective-C" />
+    <category term="Electron" />
+  </entry>
 </feed>
