@@ -68,10 +68,13 @@
       <h1 itemprop="headline">I wrote an Objective-C bridge for Node.js. Don't use it.</h1>
       <div id="about">
         <time itemprop="datePublished" datetime="2025-10-03">2025-10-03</time>
+        <span>(updated <time itemprop="dateModified" datetime="2025-10-04">2025-10-04</time>)</span>
         <address itemprop="author" itemscope itemtype="https://schema.org/Person">by <a itemprop="email" title="Send me and email" href="mailto:noah@wts.dev"><span itemprop="name">Noah Gregory</span></a>
         </address>
       </div>
     </header>
+    <h2>Clarification (<time datetime="2025-10-04">2025-10-04</time>)</h2>
+    <p>In the below article I go pretty hard against FFI's in Node.js. To clarify, when I use that term in this article, I am mainly referring to <em>general-purpose</em> FFI's (those which allow calls to arbitrary foreign functions). Properly-scoped and limited bindings (wherein specifically-written functions, and <em>only</em> those functions, are callable) can be built and used relatively safely in Node.js (although, there is still inherit risk whenever involving native code). The main purpose of this article is to caution against the use of general-purpose FFI's in Node.js.</p>
     <h2>Introduction</h2>
     <p>I wrote a Node.js package that allows you to call Objective-C API's from Node.js. I do want to note that this is not an original idea of mine and there is prior work. <a href="https://github.com/TooTallNate">Nathan Rajlich</a> (former Node.js core contributor, now at Vercel) made <a href="https://github.com/TooTallNate/NodObjC">his own Node-Objective-C bridge, NodObjC,</a> years ago. His bridge is built on top of <a href="https://github.com/node-ffi/node-ffi">the now-long-dead <code><abbr title="foreign function interface">ffi</abbr></code> package</a> (<a href="https://github.com/node-ffi/node-ffi/commits?author=TooTallNate">which he also heavily contributed to</a>). I've (somewhat shamelessly) ripped off at least the name of his bridge. Mine is called <a href="https://github.com/nmggithub/nobjc"><b>nobjc.</b></a> But you shouldn't use it.</p>
     <h2>Why not use it?</h2>
