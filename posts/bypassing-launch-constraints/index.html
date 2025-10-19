@@ -107,9 +107,9 @@ let LWCR: ILWCR.Type = {
     Library(path: "/usr/lib/libTLE.dylib")!.link()
     return unsafeBitCast(NSClassFromString("LWCR"), to: ILWCR.Type.self)
 }()</code></pre>
-  <p>Next, we can use my <code>posix_spawn()</code> wrapper API to define an extension that adds a serialized dictionary to a set of spawn attributes. But first, I need to explain something I didn't mention above: we don't actually have to pass a valid launch constraints dictionary. It has to be syntactically valid, enough for AMFI to parse it out, but the actual constraints don't have to be valid as there is a secondary parameter called the <b>constraint category</b>. If that value is 127, the constraints are parsed, but not enforced. Why that number? I don't know.</p>
-  <p>It's actually quite lucky, as AMFI only allows a certain subset of constraint categories for launch constraints to be passed in spawn attributes. Additionally, there is a specific subset of constraint categories that are <em>enforced</em>. 127 just happens to be both allowed in spawn attributes <em>and</em> not enforced. In Csaba's intital article on launch constraints, he shows off the log message that appears when AMFI enforces launch constraints on a binary: <code>AMFI: Launch Constraint Violation (enforcing) [...]</code>. You might think its strange that a log message indicates that a violation <em>is</em> indeed being enforced. That is, until you see what happens when you use constraint category 127: <code>AMFI: Launch Constraint Violation (not enforcing) [...]</code>.</p>
-  <pre><code>import BSDCore
+    <p>Next, we can use my <code>posix_spawn()</code> wrapper API to define an extension that adds a serialized dictionary to a set of spawn attributes. But first, I need to explain something I didn't mention above: we don't actually have to pass a valid launch constraints dictionary. It has to be syntactically valid, enough for AMFI to parse it out, but the actual constraints don't have to be valid as there is a secondary parameter called the <b>constraint category</b>. If that value is 127, the constraints are parsed, but not enforced. Why that number? I don't know.</p>
+    <p>It's actually quite lucky, as AMFI only allows a certain subset of constraint categories for launch constraints to be passed in spawn attributes. Additionally, there is a specific subset of constraint categories that are <em>enforced</em>. 127 just happens to be both allowed in spawn attributes <em>and</em> not enforced. In Csaba's intital article on launch constraints, he shows off the log message that appears when AMFI enforces launch constraints on a binary: <code>AMFI: Launch Constraint Violation (enforcing) [...]</code>. You might think its strange that a log message indicates that a violation <em>is</em> indeed being enforced. That is, until you see what happens when you use constraint category 127: <code>AMFI: Launch Constraint Violation (not enforcing) [...]</code>.</p>
+    <pre><code>import BSDCore
 import Foundation
 
 extension BSDCore.BSD.POSIXSpawnAttributes {
@@ -131,8 +131,8 @@ extension BSDCore.BSD.POSIXSpawnAttributes {
         )
     }
 }</code></pre>
-  <p>Now to put it all together, we just call my <code>posix_spawn()</code> wrapper with these spawn attributes.</p>
-  <pre><code>func spawnWithNoLaunchConstraints(victimPath: String) throws {
+    <p>Now to put it all together, we just call my <code>posix_spawn()</code> wrapper with these spawn attributes.</p>
+    <pre><code>func spawnWithNoLaunchConstraints(victimPath: String) throws {
     let spawnAttributes = try BSDCore.BSD.POSIXSpawnAttributes()
     try spawnAttributes.bypassLaunchConstraints()
     let pid = try BSDCore.BSD.posixSpawn(
@@ -144,14 +144,14 @@ extension BSDCore.BSD.POSIXSpawnAttributes {
     )
     print("Spawned process with pid \(pid) | \(victimPath)")
 }</code></pre>
-  <h2>Exploitability</h2>
-  <p>So how exploitable is this, really? To be honest, I'm not sure. I tried playing around with daemons, spawning them under certain conditions, but was never able to fully compromise one. Additionally, while Csaba found out about launch constraints when they blocked his attempt to copy an app to a different folder and run it, this bypass does not re-allow such exploits. Other OS security features, such as <b>AppleSystemPolicy</b> (the OS's built-in anti-virus), appear to pick up the slack and still block them. It's still possible there was some way this exploit could be used to malicious ends, but I was ultimately unable to find a full exploit chain.</p>
-  <h2>A final technical note</h2>
-  <p>There's one more thing I've been holding back on in this article until now. All of this is actually possible because AMFI now ships with the option for <b>third party launch constraints</b> enabled by default. If that option were turned off, AMFI would simply ignore any launch constraints passed in via spawn attributes. If you're curious, you can run <code>sysctl security.mac.amfi.launch_constraints_3rd_party_allowed</code> in your terminal to see the status of this option on your machine.</p>
-  <p>Interestingly, in Csaba's first article he incidentally revealed that the option was off for him at the time of writing. This initially lead me to believe the root of this vulnerability was that the option was turned on at some point. However, that was not the conclusion Apple seemingly came to. The option is still enabled post-patch. The logic for handling launch constraints has simply changed. As mentioned, now both the spawn-attribute-passed constraints and the built-in constraints are checked by AMFI.</p>
-  <h2>What about CVE-2025-43266?</h2>
-  <p>Those of you who follow my work may have noticed this is not the only CVE I had for this most recent Apple update cycle. CVE-2025-43266 was the second one. To respond to those wondering when I am going to publish my write-up on that: I don't know. My research into that bug lead me down a rabbit-hole that exploded in several different directions and I'm still parsing through how (and even if) it all fits together. There's also external factors that make me uncomfortable with disclosing specific details of that vulnerability, so until those are resolved, there likely will not be a write-up for it on my blog.</p>
-  <p>Anyways, to stay informed on that (and anything else I put out) remember to <a target="_self" href="/feed.xml">watch this space.</a></p>
+    <h2>Exploitability</h2>
+    <p>So how exploitable is this, really? To be honest, I'm not sure. I tried playing around with daemons, spawning them under certain conditions, but was never able to fully compromise one. Additionally, while Csaba found out about launch constraints when they blocked his attempt to copy an app to a different folder and run it, this bypass does not re-allow such exploits. Other OS security features, such as <b>AppleSystemPolicy</b> (the OS's built-in anti-virus), appear to pick up the slack and still block them. It's still possible there was some way this exploit could be used to malicious ends, but I was ultimately unable to find a full exploit chain.</p>
+    <h2>A final technical note</h2>
+    <p>There's one more thing I've been holding back on in this article until now. All of this is actually possible because AMFI now ships with the option for <b>third party launch constraints</b> enabled by default. If that option were turned off, AMFI would simply ignore any launch constraints passed in via spawn attributes. If you're curious, you can run <code>sysctl security.mac.amfi.launch_constraints_3rd_party_allowed</code> in your terminal to see the status of this option on your machine.</p>
+    <p>Interestingly, in Csaba's first article he incidentally revealed that the option was off for him at the time of writing. This initially lead me to believe the root of this vulnerability was that the option was turned on at some point. However, that was not the conclusion Apple seemingly came to. The option is still enabled post-patch. The logic for handling launch constraints has simply changed. As mentioned, now both the spawn-attribute-passed constraints and the built-in constraints are checked by AMFI.</p>
+    <h2>What about CVE-2025-43266?</h2>
+    <p>Those of you who follow my work may have noticed this is not the only CVE I had for this most recent Apple update cycle. CVE-2025-43266 was the second one. To respond to those wondering when I am going to publish my write-up on that: I don't know. My research into that bug lead me down a rabbit-hole that exploded in several different directions and I'm still parsing through how (and even if) it all fits together. There's also external factors that make me uncomfortable with disclosing specific details of that vulnerability, so until those are resolved, there likely will not be a write-up for it on my blog.</p>
+    <p>Anyways, to stay informed on that (and anything else I put out) remember to <a target="_self" href="/feed.xml">watch this space.</a></p>
   </article>
 </body>
 

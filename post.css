@@ -6,7 +6,6 @@ html {
     width: 100%;
 
     article.post {
-      
       header {
         text-align: center;
         margin-bottom: 2.5rem;
@@ -27,7 +26,7 @@ html {
           column-gap: 5rem;
           row-gap: 0.5rem;
 
-          time[itemprop="datePublished"] {
+          time[itemprop='datePublished'] {
             font-weight: 600;
             font-size: 2rem;
           }
@@ -73,10 +72,12 @@ html {
           margin-bottom: 0;
         }
       }
-      
-      ul, ol {
+
+      ul,
+      ol {
         overflow-x: auto;
-        & > li {
+
+        &>li {
           margin: 0.5rem 0;
           line-height: 2rem;
         }
@@ -101,18 +102,18 @@ html {
         }
       }
 
-
       --code-background: oklch(from var(--accent-color) l 0.1 h);
       --code-foreground: oklch(from var(--accent-color) calc(l + 0.6) 0.1 h);
 
       code {
         padding: 0.1rem 0.25rem;
         white-space: nowrap;
+
         a {
           color: oklch(from var(--link-color) calc(l + 0.25) c h);
 
           &:visited {
-            color: oklch(from var(--link-color) calc(l + 0.25) c calc(h + 50))
+            color: oklch(from var(--link-color) calc(l + 0.25) c calc(h + 50));
           }
         }
       }
@@ -148,7 +149,7 @@ html {
           display: inline-block;
         }
       }
-      
+
       img {
         object-fit: contain;
       }

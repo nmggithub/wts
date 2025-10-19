@@ -29,7 +29,7 @@ html {
       color: var(--link-color);
 
       &:visited {
-        color: oklch(from var(--link-color) l c calc(h + 50))
+        color: oklch(from var(--link-color) l c calc(h + 50));
       }
 
       text-underline-offset: 0.15lh;
@@ -55,7 +55,6 @@ html {
       flex-direction: column;
       text-align: justify;
 
-
       h1,
       h2,
       h3,
@@ -70,7 +69,6 @@ html {
         line-height: 1.5rem;
         margin: 1.5rem 0;
       }
-      
     }
   }
 }

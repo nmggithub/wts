@@ -8,7 +8,6 @@
 }
 
 body#landing {
-
   nav a {
     position: fixed;
     font-size: clamp(1rem, 5vw, 30vh);
@@ -25,7 +24,6 @@ body#landing {
   }
 
   div.expansion#landing-expansion {
-
     &>div.components {
       color: var(--accent-color);
 

@@ -1,10 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap');
 
 div.expansion#_404-expansion {
-
   &>div.components {
     color: var(--accent-color);
-
 
     &>span {
       margin: 0;
@@ -43,7 +41,6 @@ div.expansion#_404-expansion {
       &#found {
         order: 5;
       }
-
     }
   }
 
