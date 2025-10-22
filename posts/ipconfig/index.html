@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+
+<head>
+    <!-- -- Common -- -->
+    <base target="_blank" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'none';
+      style-src https://fonts.googleapis.com/ 'self';
+      font-src https://fonts.gstatic.com/;
+      img-src 'self';
+      form-action 'none'
+      " />
+    <link rel="icon" href="/favicon.png" />
+    <link rel="stylesheet" href="/style.css" />
+    <!-- Site Name -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Watch This Space",
+      "url": "https://wts.dev/",
+      "description": "A security research blog."
+    }
+  </script>
+    <!-- Mastadon Attribution -->
+    <meta name="fediverse:creator" content="@wtsdev@infosec.exchange">
+    <!-- Twitter/X use the standard "name" attribute -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@wtsdev" />
+    <meta name="twitter:creator" content="@wtsdev" />
+    <!-- Facebook/OpenGraph use the non-standard "property" attribute -->
+    <meta property="og:site_name" content="Watch This Space" />
+    <meta property="og:image" content="https://wts.dev/favicon.png" />
+    <meta property="og:image:secure_url" content="https://wts.dev/favicon.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="A large purple letter W on a light tan background" />
+    <!-- -- Page-Specific -- -->
+    <!-- Styles -->
+    <link rel="stylesheet" href="/post.css" />
+    <!-- URL -->
+    <link rel="canonical" href="https://wts.dev/posts/{slug}/" />
+    <meta property="og:url" content="https://wts.dev/posts/{slug}/" />
+    <!-- Title -->
+    <meta name="og:title" content="I Know The Name Of Your Wi-Fi Network | Watch This Space" />
+    <title>I Know The Name Of Your Wi-Fi Network | Watch This Space</title>
+    <!-- Description -->
+    <meta name="description" content="A security research blog." />
+    <meta property="og:description" content="A security research blog." />
+    <!-- Additional -->
+    <meta property="og:type" content="article" />
+    <!-- Author -->
+    <meta property="article:author" content="https://github.com/nmggithub" />
+    <meta name="author" content="Noah Gregory" />
+    <!-- Keywords -->
+    <meta name="keywords" content="security,macos,wi-fi,wardriving" />
+    <meta property="article:tag" content="security,macos,wi-fi,wardriving" />
+</head>
+
+<body>
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <header>
+            <h1 itemprop="headline">I Know the Name Of Your Wi-Fi Network</h1>
+            <div id="about">
+                <time itemprop="datePublished" datetime="2025-10-22">2025-10-22</time>
+                <address itemprop="author" itemscope itemtype="https://schema.org/Person">by <a itemprop="email" title="Send me and email" href="mailto:noah@wts.dev"><span itemprop="name">Noah Gregory</span></a>
+                </address>
+            </div>
+        </header>
+        <h2>Introduction</h2>
+        <p>I know the name of your Wi-Fi network. Or at least I would if you were still running a macOS version from earlier than a few weeks ago. You <em>have</em> upgraded, right? If you haven't, you should probably do that soon. You might be wondering what the big deal is, or if this information was meant to be really all that restricted on macOS to begin with. To answer the latter question, the <a href="https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.wifi-info"><code>com.apple.developer.networking.wifi-info</code></a> entitlement exists, which does seem to be an attempt to restrict access information about a user's Wi-Fi networks. But why should access to this information be restricted?</p>
+        <h2>Wardriving</h2>
+        <p><a href="https://en.wikipedia.org/wiki/Wardriving">Wardriving</a> is a term used to describe the act of driving around and recording the coordinates of each Wi-Fi network encountered. A common use for such information is to be a supplement to <abbr title="Global Positioning System">GPS</abbr> technology. A smartphone with a weak or unreliable GPS signal can look at the Wi-Fi networks it sees around it and look those up in a wardriving database to better determine where exactly it is. This is more reliably done based off of the <abbr title="Basic Service Set Identifier">BSSID</abbr> of the network rather than the network name (more formally called the <abbr title="Service Set Identifier">SSID</abbr>), as the former is usually non-configurable and tied to the hardware of the access point.</p>
+        <h2>The <code>ipconfig</code> Command</h2>
+        <p>Those with even a passing knowledge of working with the Command Prompt in Windows will know about <a href="https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ipconfig">the <code>ipconfig</code> command.</a> If you then moved to Linux, you may recall having to learn that the equivalent over there is <a href="https://linux.die.net/man/8/ifconfig">the <code>ifconfig</code> command</a> (or now, really, <a href="https://linux.die.net/man/8/ip">the <code>ip</code> command</a>). You may also know that <a href="https://man.freebsd.org/cgi/man.cgi?ifconfig">the <code href="https://man.freebsd.org/cgi/man.cgi?ifconfig">ifconfig</code> command also exists on FreeBSD</a>, which Darwin/XNU (the OS and kernel underpinning Apple's operating systems) is based, in part, on. In fact, if you use the <code>ifconfig</code> command in a macOS terminal, you <em>will</em> get ouput that is similar to if you were to use it on macOS's other Unix-y cousins.</p>
+        <p>You might, then, be surprised to know that an <code>ipconfig</code> command also exists on macOS. You might also, then, be further surprised to discover that <a href="https://github.com/apple-oss-distributions/bootp/blob/main/ipconfig.tproj/client.c">the source code for this <code>ipconfig</code> command on macOS is open-source.</a> And herein lies a part of the OS that Apple probably forgot about. This command could be used to get the name of the then-currently-connected Wi-Fi network without the need for the aforementioned entitlement. Thankfully, BSSID's were redacted. However, given a unique-enough network name (and given that network is acurately included in a wardriving database), this could have been used for user tracking.</p>
+        <h2>The Fix</h2>
+        <p>It's rare that I can point to the actual code that Apple wrote to fix something, but this time I can. To explain how the <code>ipconfig</code> command works briefly: it sends Mach messages to a MIG server (<a href="/password-leak/#mig">check out my article here to learn more about MIG</a>) which then responds with the information relevant to the given command invocation. <a href="https://github.com/apple-oss-distributions/bootp/blob/bootp-527/IPConfiguration.bproj/server.c#L511">The vulnerable routine in question, <code>ipconfig_get_summary</code>, now performs an entitlement check on the caller</a> (specifically it looks for the <code>com.apple.IPConfiguration.get-information</code> entitlement). If the caller does not have the entitlement, information is not returned. And while the <code>ipconfig</code> command itself has this entitlement, <a href="https://github.com/apple-oss-distributions/bootp/blob/bootp-527/IPConfiguration.bproj/ipconfigd.c#L2660">SSID's are now also redacted by default.</a></p>
+        <h2>Conclusion</h2>
+        <p>This was a very simple <a href="https://en.wikipedia.org/wiki/Information_leakage">information leakage</a> vulnerability that was very simple for Apple to patch. There was no CVE given, with <a href="https://support.apple.com/en-us/125110">Apple instead choosing to thank me, among others, under the <q>Additional recognition</q> section of their security notes.</a> I was also awarded no money for this, and was told I was not the first to report this. So congratulations to whoever did report it first. Thank you to those who have read this. If you liked it and want to stay informed and see whatever I post next, remember to <a target="_self" href="/feed.xml">watch this space.</a></p>
+    </article>
+</body>
+
+</html>

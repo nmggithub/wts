@@ -128,7 +128,7 @@
     <p>Descriptors allow tasks to share out-of-line memory and even port rights with each other, with the kernel mapping addresses and manipulating port name spaces as necessary. The data in the arbitrary payload, on the other hand, is transferred as-is from the sending task to the receiving task.</p>
     <h3>How Tasks Get Send Rights</h3>
     <p>One might wonder how a task gets send rights to start with. macOS includes a <b>bootstrap server,</b> a Mach task that holds the receive right to a port to which every task holds a send right. The bootstrap server exposes the concept of <b>Mach services,</b> which are Mach servers registered with the bootstrap port with specific string names. Clients can ask the bootstrap server for send rights to these Mach services by name.</p>
-    <h2>The Mach Interface Generator (MIG)</h2>
+    <h2 id="mig">The Mach Interface Generator (MIG)</h2>
     <h3>Introduction</h3>
     <p>While Mach messages seem simple on their face, in practice they can involve a lot of manual memory management, which can be prone to issues. Perhaps in an effort to combat this, the authors of Mach included <a href="https://www.cs.cmu.edu/afs/cs/project/mach/public/www/doc/abstracts/mig.html"><abbr title="Mach Interface Generator">MIG</abbr>,</a> which provides a way to create functional interfaces around the sending and receiving of Mach messages.</p>
     <p>MIG is two parts: a pseudo-C IDL (interface definition language) and a compiler that takes in an IDL file and outputs multiple C files:</p>
