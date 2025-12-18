@@ -107,4 +107,17 @@
     <category term="Wi-Fi" />
     <category term="Wardriving" />
   </entry>
+  <entry>
+    <title>DirtyDict: Escaping the macOS Sandbox and wrecking havoc</title>
+    <link href="https://wts.dev/posts/dirtydict/" rel="alternate" />
+    <id>urn:uuid:5eae4ba1-d2d1-4d02-af0d-1cb70e97b310</id>
+    <published>2025-12-18T12:49:33-05:00</published>
+    <updated>2025-12-18T12:49:33-05:00</updated>
+    <category term="Security" />
+    <category term="macOS" />
+    <category term="DirtyDict" />
+    <category term="NSSpellChecker" />
+    <category term="NSSpellServer" />
+    <category term="path traversal" />
+  </entry>
 </feed>
