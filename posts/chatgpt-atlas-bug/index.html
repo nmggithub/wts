@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+
+<head>
+  <!-- -- Common -- -->
+  <base target="_blank" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="
+      default-src 'none';
+      style-src https://fonts.googleapis.com/ 'self';
+      font-src https://fonts.gstatic.com/;
+      img-src 'self';
+      form-action 'none'
+      " />
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/style.css" />
+  <!-- Site Name -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Watch This Space",
+      "url": "https://wts.dev/",
+      "description": "A security research blog."
+    }
+  </script>
+  <!-- Mastadon Attribution -->
+  <meta name="fediverse:creator" content="@wtsdev@infosec.exchange">
+  <!-- Twitter/X use the standard "name" attribute -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@wtsdev" />
+  <meta name="twitter:creator" content="@wtsdev" />
+  <!-- Facebook/OpenGraph use the non-standard "property" attribute -->
+  <meta property="og:site_name" content="Watch This Space" />
+  <meta property="og:image" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:secure_url" content="https://wts.dev/favicon.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:alt" content="A large purple letter W on a light tan background" />
+  <!-- -- Page-Specific -- -->
+  <!-- Styles -->
+  <link rel="stylesheet" href="/post.css" />
+  <!-- URL -->
+  <link rel="canonical" href="https://wts.dev/posts/{slug}/" />
+  <meta property="og:url" content="https://wts.dev/posts/{slug}/" />
+  <!-- Title -->
+  <meta name="og:title" content="How I &quot;hacked&quot; ChatGPT Atlas... and why it wasn't patched | Watch This Space" />
+  <title>How I "hacked" ChatGPT Atlas... and why it wasn't patched | Watch This Space</title>
+  <!-- Description -->
+  <meta name="description" content="A security research blog." />
+  <meta property="og:description" content="A security research blog." />
+  <!-- Additional -->
+  <meta property="og:type" content="article" />
+  <!-- Author -->
+  <meta property="article:author" content="https://github.com/nmggithub" />
+  <meta name="author" content="Noah Gregory" />
+  <!-- Keywords -->
+  <meta name="keywords" content="security,macos,chatgpt,atlas,chrome,electron" />
+  <meta property="article:tag" content="security,macos,chatgpt,atlas,chrome,electron" />
+</head>
+
+<body>
+  <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+      <h1 itemprop="headline">How I "hacked" ChatGPT Atlas... and why it wasn't patched</h1>
+      <div id="about">
+        <time itemprop="datePublished" datetime="2026-02-16">2026-02-16</time>
+        <address itemprop="author" itemscope itemtype="https://schema.org/Person">by <a itemprop="email" title="Send me an email" href="mailto:noah@wts.dev"><span itemprop="name">Noah Gregory</span></a>
+        </address>
+      </div>
+    </header>
+    <h2>Introduction</h2>
+    <p>Right at the beginning here, I want to make two things abundantly clear. First, the bug I found is arguably not a "hack". In fact, that's part of why I'm writing this article. Secondly, I harbor no ill will towards the OpenAI team (sidenote: thank you <a href="https://x.com/theo">Theo</a> for quickly connecting me with them). They've been extremely kind and communicative throughout this entire process. The reason why my bug wasn't patched is much larger than them, and it's one I've talked about before: <a href="https://chromium.googlesource.com/chromium/src/+/main/docs/security/faq.md#why-arent-physically_local-attacks-in-chromes-threat-model">Chrome's exclusion of local attacks in their threat model.</a></p>
+    <p>This article is about a lot more than just Atlas. In fact, I'm going to be front-loading a lot of information before I talk about the Atlas bug. After interacting with aspects of the Chrome ecosystem from many angles, and from researching macOS as a whole, I've come to the same conclusion as some of my fellow researchers have: that Chrome's threat model often leaves users on macOS <em>less</em> secure. A lot of what's in this article is repeated from my previous work, but I wanted to try and centralize my thoughts into a single article.</p>
+    <h2>A platform disconnect</h2>
+    <p>As mentioned, Chrome excludes local attacks in their threat model. Their listed reasons for this can be summarized down to the assertion that a local attacker can hook or modify other executing apps, so local access is already game over. This argument does not hold on macOS because, <a href="/posts/nobjc#code-injection-and-macos">as I've discussed previously, code injection is essentially dead on macOS.</a> What's worse is that, by ignoring local attacks, Chrome opens up users on macOS to attacks that undermine fundamental security features the OS itself.</p>
+    <h2>Breaking macOS</h2>
+    <p>TCC (which stands for <a href="https://support.apple.com/guide/security/controlling-app-access-to-files-secddd1d86a6/"><q>Transparency, Consent, and Control</q></a>, as <a href="https://developer.apple.com/forums/thread/678819">confirmed by Quinn, Developer Technical Support for Apple</a>), is essentially the permission system on both macOS and iOS. <a href="/posts/tcc-sql-injection#TCC">I've already explained more about how TCC works in a previous article,</a> so to put it briefly: TCC introduces the concept of "services" which are, conceptually, different collections of resources a user must give an app explicit consent to before that app can access those resources. These user consent responses are collected and stored in a database that is checked against at runtime when an app wants to access TCC-protected resources.</p>
+    <p>Additionally, macOS includes a private internal API to determine what process is responsible for a given process. The main process for an app is often responsible for itself <em>and</em> its subprocesses (although <a href="https://www.qt.io/blog/the-curious-case-of-the-responsible-process">there is a private API that allows a process to disclaim a subprocess when launching it</a>). TCC uses this API, among other things, to check against the stored database of user consent responses. In most cases where a process attempts to access TCC-protected resources behind a service, the access will be granted if its responsible process (or app) has an affirmative consent response to that service stored in the TCC database.</p>
+    <p>If a local vulnerability was found in an app which allowed an attacker to get the main app process (or one of its subprocesses) to access some TCC-protected resources for them, that action would be evaluated based on the user consent given to that target app (not any malicious attacking one). This opens up the possibility for a malicious app to "steal" the consent given to another app. While an attack like this often does not put the app itself (or it's data) at risk, is <em>does</em> fundamentally breaking how TCC is supposed to and expected to work.</p>
+    <p>To be clear, this sort of thing isn't unique to Chrome. It's part of a whole class of vulnerability: <a href="https://en.wikipedia.org/wiki/Confused_deputy_problem">confused deputy attacks.</a> For a non-Chrome example: Last year, <a href="https://github.com/ghostty-org/ghostty/security/advisories/GHSA-q9fg-cpmh-c78x">I found and reported to Ghostty that their terminal would immediately open any executable that was passed to it,</a> opening the door for such attacks. In response, <a href="https://github.com/ghostty-org/ghostty/pull/8442">Ghostty added a prompt before running files passed to it.</a> The also matched the behavior of other terminals. The point here is that Ghostty responded to <em>and</em> defended against a local attack. That's something it likely wouldn't have done had it had been operating under Chrome's threat model.</p>
+    <h2>Who operates under Chrome's threat model?</h2>
+    <p>In 2024, the Electron team responded to a series of <q>Critical</q>-scored CVE's that were filed against prominent Electron apps. In a blog post, <a href="https://www.electronjs.org/blog/statement-run-as-node-cves#how-might-this-impact-me">the Electron team <em>themselves</em> assessed these bugs as <q>not critical</q>, citing Chrome's threat model.</a> This makes sense, as Electron itself is based on Chromium. In private conversations I've had with members of the Electron team, it's clear that this is, indeed, an example of the threat model being inherited downstream. But it's not the only one. As I've written about before, <a href="/posts/nobjc#discord">prominent Electron apps like Discord have likewise rejected reports of local-only attacks, citing Chrome's threat model.</a></p>
+    <p>The CVE's the Electron team were responding to abused certain obscure features of Electron to achieve JS code injection into Electron apps. Electron's recommended mitigations were to use <a href="https://www.electronjs.org/docs/latest/tutorial/fuses">their Fuses API</a> to disable those features. However, outside of those obscure features, JavaScript code injection can <em>also</em> be achieved in Electron apps using a much simpler method: simply editing the app's JavaScript code files. To Electron's credit, they do offer features like <a href="https://www.electronjs.org/docs/latest/tutorial/asar-integrity">ASAR Integrity</a> to help developers secure their code. However, it's up to the developers of the apps to actually <em>use</em> it. The aforementioned Discord does not, <a href="https://x.com/wtsdev/status/2000610949015736651">allowing attackers with local access to hijack Discord and use it as a keylogger (if the user granted it permission to monitor keystrokes).</a></p>
+    <p>Down another path, Chromium forks like ChatGPT Atlas have to decide if and how they want to inherit Chrome's threat model. And, despite me believing they shouldn't outright ignore local attacks, it's a more complicated situation than that. If they choose to accept reports of local attacks, what should they do when people report local bugs that originate upstream and were ignored under the upstream threat model? They could try to limit themselves by only accepting reports of local attacks that are inherent to their fork, but the line of what is and isn't <q>inherent to their fork</q> can get blurry and might be an infeasible boundary in actual practice. Ultimately, the team at OpenAI decided against patching my reported bug. But what is my bug?</p>
+    <h2>Stealing Atlas's TCC privileges</h2>
+    <p>You may have seen <a href="https://openai.com/index/building-chatgpt-atlas/">OpenAI's blog post about OWL, their architecture for Atlas.</a> You may have also seen <a href="https://www.youtube.com/watch?v=jxsA_185lMI">Theo's video covering that article.</a> I too share Theo's frightening fascination with OWL, although he probably finds it more troubling than I do. I like abstractions. It's why I wrote <a href="https://github.com/nmggithub/Kass">a whole set of Swift wrappers around C-level macOS API's</a> (both as a learning experience <em>and</em> to help me in my reverse-engineering efforts). It's also why I was excited while digging through the code of Atlas, stumbling upon things such as the Swift Mojo bindings mentioned in OpenAI's article. It was fascinating to reverse-engineer and search through.</p>
+    <p>Quite quickly upon digging through Atlas, I found that Atlas is two actually apps. As explained in their article, OpenAI wrote a custom SwiftUI app to act as the <q>OWL Client</q> while a headless version of Chromium is used as the <q>OWL Host</q>. It's in this unique architecture where I found my bug. OWL includes a mechanism to point to a different host app than the one Atlas shipped with. This allows an attacker with local access to plant a fake host app and point to it. That fake app then becomes a subprocess of the client app, allowing it to act with the TCC consent granted to Atlas since macOS believes Atlas is responsible for it.</p>
+    <p>In some respects, this is better than a remote bug originating from a website. You need to download and run something malicious in order to be exploited through this, not just visit a bad website. It's also worse in some respects. For example, if you downloaded Atlas, tried it for a bit (maybe gave it access to your microphone for a quick thing, and then never opened it again), a malicious app can still hijack Atlas and use that fact to access your microphone. You'd still be notified in the menu bar, but it would show that the Atlas app itself is doing the accessing. Additionally, through mechanics I won't reveal here to avoid encouraging abuse, it's possible to exploit this bug without ever showing an Atlas window, nor having it's icon appear in the dock.</p>
+    <h2>The current reality</h2>
+    <p>As of writing, this bug remains unpatched. It's unclear to me what use a mechanism to point to a different OWL Host has in production builds of Atlas, but it does seem to be important enough for OpenAI to keep it in the app. Again, I harbor no ill-will towards OpenAI in any of this. While I am disappointed such a bug was not patched, I completely understand their reasoning. Running a bug bounty program is hard, especially at their scale, and deciding what's in scope or not is often an exercise in workload management.</p>
+    <p>On one hand, I have to thank Chrome. Despite my issues with their threat model, it should also be noted that the Chrome team has put a lot of work into making the web what it is today. It's powerful and capable enough to where most people probably don't download and run things anymore, they just use web apps. Wether or not something like a rise in popularity of installable AI apps will lead to users downloading and running more things remains to be seen (<a href="https://appleinsider.com/articles/26/01/09/ai-coded-malware-arrives-on-the-mac-through-fake-grok-ai-app">cryptomining malware has recently been spotted purporting to be a macOS app for Grok AI</a>). It's possible users may remain resistant to anything that's not a web app. It's possible they won't.</p>
+    <h2>Looking to the future</h2>
+    <p>If Chrome were to change their stance on local attacks, their updated threat model would likely be adopted downstream just as their current one already is. In my conversations with those downstream, that has been made very clear. Now, I'm not naïve. I know I'm just one person with one small perspective (albeit one shared with my fellow researchers). I know there are many legitimate arguments <em>for</em> Chrome's current exclusion of local attacks from their threat model. I know this situation is more complex than simply this inclusion or exclusion of local attacks. I know there's more to it. I don't expect things to shift in just a day or two. But none of that changes the fact that the current threat model has <em>real</em> harmful downstream effects.</p>
+    <p><a href="https://web.archive.org/web/20180608133125/https://developer.apple.com/videos/play/wwdc2018/702/">Apple brought TCC to macOS in WWDC 2018, showing it off while announcing macOS Mojave.</a> Days later, <a href="https://objective-see.org/blog/blog_0x2F.html">Patrick Wardle of Objective-See wrote a blog post about hijacking apps to steal their TCC privileges.</a> In late 2019, <a href="https://wojciechregula.blog/post/abusing-electron-apps-to-bypass-macos-security-controls/">a fellow researcher of mine, Wojciech Reguła, wrote about the ability to steal TCC privileges from Electron apps by injecting JS.</a> The threat of these kinds of local attacks has been know about for several years. It's beyond time. The Chrome / Electron ecosystem (as a whole) <em>needs</em> to rethink how their security posture interplays with macOS and <em>needs</em> to do more to protect their users from things like this.</p>
+    <p>If you liked this article, remember to <a target="_self" href="/feed.xml">watch this space.</a></p>
+  </article>
+</body>
+
+</html>

@@ -120,4 +120,17 @@
     <category term="NSSpellServer" />
     <category term="path traversal" />
   </entry>
+  <entry>
+    <title>How I "hacked" ChatGPT Atlas... and why it wasn't patched</title>
+    <link href="https://wts.dev/posts/chatgpt-atlas-bug/" rel="alternate" />
+    <id>urn:uuid:de7c266e-bade-40ee-84d0-ba63b569ca3d</id>
+    <published>2026-02-16T12:54:17-05:00</published>
+    <updated>2026-02-16T12:54:17-05:00</updated>
+    <category term="Security" />
+    <category term="macOS" />
+    <category term="ChatGPT" />
+    <category term="Atlas" />
+    <category term="Chrome" />
+    <category term="Electron" />
+  </entry>
 </feed>
